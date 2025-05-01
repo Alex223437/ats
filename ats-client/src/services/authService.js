@@ -1,5 +1,10 @@
 import api from './apiService';
 
+export const registerUser = async (formData) => {
+  const response = await api.post('/register', formData);
+  return response.data;
+};
+
 export const loginUser = async (email, password) => {
   const formData = new URLSearchParams();
   formData.append('username', email);
