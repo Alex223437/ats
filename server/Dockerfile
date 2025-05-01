@@ -15,5 +15,5 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Открываем порт для FastAPI
 EXPOSE 8000
 
-# Запускаем сервер
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Запускаем Alembic миграции и потом FastAPI
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT"]
