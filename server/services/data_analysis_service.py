@@ -1,6 +1,6 @@
 import pandas as pd
-from server.data.market_data import MarketData
-from server.services.strategy_service import StrategyService
+from data.market_data import MarketData
+from services.strategy_service import StrategyService
 
 class DataAnalysisService:
     @staticmethod

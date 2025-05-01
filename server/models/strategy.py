@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import relationship
-from server.database import Base
+from database import Base
 
 class Strategy(Base):
     __tablename__ = "strategies"

@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from jose import JWTError, jwt
 
-from server.database import get_db
-from server.models.user import User
-from server.schemas.user import UserCreate, UserResponse
-from server.services.security import get_password_hash, verify_password, create_access_token
-from server.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from database import get_db
+from models.user import User
+from schemas.user import UserCreate, UserResponse
+from services.security import get_password_hash, verify_password, create_access_token
+from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 auth_router = APIRouter()
 

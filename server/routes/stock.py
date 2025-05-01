@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 import asyncio
-from server.services.data_analysis_service import DataAnalysisService
-from server.data.market_data import MarketData
+from services.data_analysis_service import DataAnalysisService
+from data.market_data import MarketData
 
 
 stock_router = APIRouter()

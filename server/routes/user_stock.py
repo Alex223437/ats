@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from server.database import get_db
-from server.models.stock import UserStock
-from server.models.user import User
-from server.routes.auth import get_current_user  # ✅ Импорт get_current_user
+from database import get_db
+from models.stock import UserStock
+from models.user import User
+from routes.auth import get_current_user  # ✅ Импорт get_current_user
 
 user_stock_router = APIRouter(prefix="/users/me/stocks", tags=["user_stocks"])
 

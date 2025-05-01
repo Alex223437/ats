@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from server.database import Base
+from database import Base
 
 class UserStock(Base):
     __tablename__ = "user_stocks"

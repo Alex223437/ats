@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from server.database import get_db
-from server.models.strategy import Strategy
-from server.models.user import User
-from server.routes.auth import get_current_user  # Для получения текущего пользователя
-from server.schemas.strategy import StrategyCreate, StrategyResponse
+from database import get_db
+from models.strategy import Strategy
+from models.user import User
+from routes.auth import get_current_user  # Для получения текущего пользователя
+from schemas.strategy import StrategyCreate, StrategyResponse
 
 strategy_router = APIRouter()
 

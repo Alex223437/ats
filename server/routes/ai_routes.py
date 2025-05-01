@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse
 import matplotlib.pyplot as plt
 import io
 import base64
-from server.services.ai_service import predict_signals
-from server.data.market_data import MarketData
+from services.ai_service import predict_signals
+from data.market_data import MarketData
 
 ai_router = APIRouter()
 

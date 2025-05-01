@@ -2,20 +2,20 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import database and models
-from server.database import engine, Base
+from database import engine, Base
 
 # Import routes
-from server.routes.stock import stock_router
-from server.routes.auth import auth_router
-from server.routes.user_stock import user_stock_router 
-from server.routes.ai_routes import ai_router
-from server.routes.trades import trades_router
-from server.routes.user import user_router
-from server.routes.strategy import strategy_router
-from server.routes.automation import automation_router
+from routes.stock import stock_router
+from routes.auth import auth_router
+from routes.user_stock import user_stock_router 
+from routes.ai_routes import ai_router
+from routes.trades import trades_router
+from routes.user import user_router
+from routes.strategy import strategy_router
+from routes.automation import automation_router
 
 # Import scheduler
-from server.scheduler import start_scheduler
+from scheduler import start_scheduler
 
 app = FastAPI()
 

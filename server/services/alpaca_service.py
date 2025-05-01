@@ -1,7 +1,7 @@
 # 📁 server/services/alpaca_service.py
 
 import alpaca_trade_api as tradeapi
-from server.models.user import User
+from models.user import User
 
 def get_alpaca_api(user: User):
     """Инициализация клиента Alpaca по ключам пользователя"""

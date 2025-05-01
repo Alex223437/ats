@@ -1,10 +1,10 @@
 from fastapi import APIRouter
-from server.services.alpaca_service import get_positions, place_order
+from services.alpaca_service import get_positions, place_order
 from fastapi import Depends
-from server.routes.auth import get_current_user
-from server.services.alpaca_service import get_open_orders, cancel_order, close_position
+from routes.auth import get_current_user
+from services.alpaca_service import get_positions, get_open_orders, place_order, cancel_order, close_position
 from pydantic import BaseModel
-from server.models.user import User
+from models.user import User
 
 class OrderSchema(BaseModel):
     symbol: str
@@ -20,7 +20,7 @@ class OrderSchema(BaseModel):
 
 trades_router = APIRouter()
 
-from server.services.alpaca_service import get_positions, get_open_orders, place_order, cancel_order, close_position
+
 
 @trades_router.get("/trades")
 async def get_trades(user: User = Depends(get_current_user)):

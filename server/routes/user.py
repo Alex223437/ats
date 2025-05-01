@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from server.schemas.user import (
+from schemas.user import (
     UserSettingsUpdate,
     UserSettingsResponse,
     UserBrokerSettingsUpdate,
 )
-from server.database import get_db
-from server.models.user import User
-from server.routes.auth import get_current_user
-from server.services.security import get_password_hash
-from server.services.broker_factory import get_alpaca_api 
+from database import get_db
+from models.user import User
+from routes.auth import get_current_user
+from services.security import get_password_hash
+from services.broker_factory import get_alpaca_api 
 
 user_router = APIRouter()
 

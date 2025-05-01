@@ -1,6 +1,6 @@
 import pickle
 import pandas as pd
-from server.data.data_preprocessing import preprocess_data
+from data.data_preprocessing import preprocess_data
 
 def load_model():
     """Загрузка обученной модели"""

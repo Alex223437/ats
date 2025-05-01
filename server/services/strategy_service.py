@@ -1,8 +1,8 @@
 import pandas as pd
 from sqlalchemy.orm import Session
-from server.database import get_db
-from server.models.strategy import Strategy
-from server.services.ai_service import predict_signals  
+from database import get_db
+from models.strategy import Strategy
+from services.ai_service import predict_signals  
 
 class StrategyService:
     @staticmethod
