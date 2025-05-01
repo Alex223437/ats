@@ -1,0 +1,32 @@
+# Node (frontend)
+ats-client/node_modules
+ats-client/dist
+ats-client/.env
+ats-client/.vite
+
+# Python (backend)
+server/__pycache__/
+server/.env
+server/.venv
+server/.mypy_cache
+server/.pytest_cache
+server/instance
+server/.DS_Store
+
+# General
+.env
+.env.*
+*.log
+*.sqlite
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+*.egg-info/
+
+# Docker
+*.pid
+docker-compose.override.yml

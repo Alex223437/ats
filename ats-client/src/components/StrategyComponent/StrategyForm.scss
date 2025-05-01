@@ -1,0 +1,130 @@
+.strategy-form {
+  background: linear-gradient(135deg, #1e1b4b, #2e1065);
+  padding: 2rem;
+  margin: 50px auto;
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: #e0e7ff;
+  font-family: 'Inter', sans-serif;
+
+  h2 {
+    font-size: 1.8rem;
+    text-align: center;
+    color: #c4b5fd;
+    font-weight: bold;
+  }
+
+  label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #dbeafe;
+  }
+
+  input[type='text'],
+  select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #6366f1;
+    border-radius: 0.5rem;
+    background-color: #0f172a;
+    color: #f1f5f9;
+    transition: border-color 0.3s, background-color 0.3s;
+
+    &:focus {
+      border-color: #a78bfa;
+      outline: none;
+      background-color: #1e293b;
+    }
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    color: #a5b4fc;
+    margin-top: 1rem;
+    border-bottom: 1px solid #4f46e5;
+    padding-bottom: 4px;
+  }
+
+  .signal-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #1e293b;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    border: 1px solid #4f46e5;
+
+    select {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      background-color: #0f172a;
+      border: 1px solid #4f46e5;
+      color: #f1f5f9;
+      border-radius: 0.4rem;
+    }
+
+    input[type='range'] {
+      flex: 2;
+      accent-color: #6366f1;
+    }
+
+    span {
+      width: 40px;
+      text-align: center;
+      font-weight: 700;
+      color: #93c5fd;
+    }
+
+    .remove-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: 0.2s;
+
+      &:hover {
+        background: #dc2626;
+      }
+    }
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  button {
+    background: linear-gradient(to right, #6366f1, #8b5cf6);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+      background: linear-gradient(to right, #7c3aed, #6d28d9);
+    }
+
+    &.delete {
+      background: linear-gradient(to right, #ef4444, #b91c1c);
+
+      &:hover {
+        background: linear-gradient(to right, #dc2626, #991b1b);
+      }
+    }
+  }
+}

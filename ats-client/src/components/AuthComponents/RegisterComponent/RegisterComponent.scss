@@ -1,0 +1,55 @@
+.register-container {
+  max-width: 420px;
+  margin: 80px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #1e1b4b, #2e1065);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  color: #f1f5f9;
+ 
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  h2 {
+    text-align: center;
+    color: #a5b4fc;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  input {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #0f172a;
+    color: white;
+    font-size: 15px;
+    transition: 0.2s;
+
+    &:focus {
+      outline: none;
+      background-color: #1e293b;
+      box-shadow: 0 0 0 2px #6366f1;
+    }
+  }
+
+  button {
+    background: linear-gradient(to right, #8b5cf6, #7c3aed);
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+      background: linear-gradient(to right, #7c3aed, #6d28d9);
+    }
+  }
+}

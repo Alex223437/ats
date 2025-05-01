@@ -1,0 +1,16 @@
+.main {
+  display: flex;
+  align-items: start;
+  gap: 30px;
+  background-color: #1B103C;
+  background: linear-gradient(70deg, rgb(23, 18, 84), rgb(55, 22, 91));
+  min-height: calc(100vh - 61px - 126px);
+  padding:15px ;
+  position: relative;
+  border-radius: 0 0 15px 15px;
+}
+
+
+.App {
+  padding: 30px;
+}
