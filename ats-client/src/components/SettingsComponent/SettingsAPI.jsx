@@ -5,6 +5,7 @@ import {
   checkBrokerConnection,
   disconnectBroker
 } from '../../services/userService';
+import './SettingsAPI.scss';
 
 const SettingsAPI = () => {
   const [broker, setBroker] = useState('alpaca');
@@ -53,12 +54,12 @@ const SettingsAPI = () => {
       if (check.connected && check.data?.account_status && check.data?.cash !== undefined) {
         setConnected(true);
         setAccountInfo(check.data);
-        setMessage('✅ Подключено!');
+        setMessage('✅ Connected!');
       } else {
-        setMessage('✅ Ключи обновлены, но не удалось подключиться');
+        setMessage('✅ Keys updated, but not connected. Please check your API keys.');
       }
     } else {
-      setMessage('❌ Ошибка при обновлении ключей');
+      setMessage('❌ Failed to save settings. Please check your API keys.');
     }
 
     setLoading(false);
@@ -82,47 +83,42 @@ const SettingsAPI = () => {
   };
 
   return (
-    <div className="settings-broker">
+    <>
       <h2>API Broker Settings</h2>
-
+  
       {connected ? (
         <>
-          <p className="status">
-            ✅ Connected to Alpaca — <strong>{accountInfo.account_status}</strong>, Cash: $
-            {parseFloat(accountInfo.cash).toFixed(2)}
+          <p className="message">
+            ✅ Connected to Alpaca — <strong>{accountInfo.account_status}</strong>, Cash: ${parseFloat(accountInfo.cash).toFixed(2)}
           </p>
-          <button onClick={handleDisconnect} className="disconnect-btn">
+          <button onClick={handleDisconnect}>
             ❌ Disconnect Broker
           </button>
         </>
       ) : (
-        <>
+        <div className="settings-form">
           <label>Choose Broker</label>
           <select value={broker} onChange={(e) => setBroker(e.target.value)}>
             <option value="alpaca">Alpaca</option>
           </select>
-
+  
           <label>API Key</label>
           <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-
+  
           <label>API Secret</label>
-          <input
-            value={apiSecret}
-            onChange={(e) => setApiSecret(e.target.value)}
-            type="password"
-          />
-
+          <input value={apiSecret} onChange={(e) => setApiSecret(e.target.value)} type="password" />
+  
           <label>Base URL</label>
           <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
-
+  
           <button onClick={handleSave} disabled={loading}>
             {loading ? 'Saving...' : 'Save'}
           </button>
-
-          {message && <p className="status">{message}</p>}
-        </>
+  
+          {message && <p className="message">{message}</p>}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

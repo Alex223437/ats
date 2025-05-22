@@ -1,10 +1,17 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import Optional
 
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 
 class UserResponse(BaseModel):
     id: int
@@ -13,28 +20,26 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-
     class Config:
-        from_attributes = True  # Для совместимости с SQLAlchemy
+        from_attributes = True  
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
 
 class UserSettingsUpdate(BaseModel):
-    username: str | None = None
-    email: str | None = None
-    password: str | None = None
-    alpaca_api_key: str | None = None
-    alpaca_api_secret: str | None = None
-    alpaca_base_url: str | None = None
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None  
+    alpaca_api_key: Optional[str] = None
+    alpaca_api_secret: Optional[str] = None
+    alpaca_base_url: Optional[str] = None
+
 
 class UserSettingsResponse(BaseModel):
     username: str
-    email: str
-    alpaca_api_key: str | None = None
-    alpaca_api_secret: str | None = None
-    alpaca_base_url: str | None = None
+    email: EmailStr
+    alpaca_api_key: Optional[str] = None
+    alpaca_api_secret: Optional[str] = None
+    alpaca_base_url: Optional[str] = None
+
 
 class UserBrokerSettingsUpdate(BaseModel):
     broker: str

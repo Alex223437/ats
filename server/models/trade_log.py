@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, func
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Boolean, func
 from database import Base
 
 class TradeLog(Base):
@@ -8,7 +8,14 @@ class TradeLog(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     strategy_id = Column(Integer, ForeignKey("strategies.id", ondelete="CASCADE"), nullable=False)
     symbol = Column(String, nullable=False)
-    action = Column(String, nullable=False)  # "buy" / "sell"
+    action = Column(String, nullable=False)  # buy / sell
     price = Column(Float, nullable=False)
     quantity = Column(Integer, nullable=False)
+    exit_price = Column(Float, nullable=True)
+    exit_time = Column(DateTime, nullable=True)
+    pnl = Column(Float, nullable=True)
     timestamp = Column(DateTime, default=func.now(), nullable=False)
+
+    status = Column(String, default="pending")  # pending / matched / cancelled / rejected
+    is_order = Column(Boolean, default=True)
+    broker_order_id = Column(String, nullable=True)

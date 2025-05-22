@@ -27,6 +27,8 @@ __pycache__/
 .DS_Store
 *.egg-info/
 .prettierrc
+.venv
+.venv_tf
 
 # Docker
 *.pid

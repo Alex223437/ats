@@ -1,9 +1,9 @@
 .main {
   display: flex;
-  align-items: start;
-  gap: 30px;
+  gap: 24px;
   background-color: #1B103C;
   background: linear-gradient(70deg, rgb(23, 18, 84), rgb(55, 22, 91));
+  height: 100%;
   min-height: calc(100vh - 61px - 126px);
   padding:15px ;
   position: relative;
@@ -13,4 +13,33 @@
 
 .App {
   padding: 30px;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 27, 75, 0.95);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.loading-text {
+  margin-top: 24px;
+  color: #cbd5e1;
+  font-size: 15px;
+  font-style: italic;
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.loader-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }

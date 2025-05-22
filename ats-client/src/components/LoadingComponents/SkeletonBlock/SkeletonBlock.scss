@@ -1,0 +1,30 @@
+.skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.skeleton-row {
+  height: 20px;
+  width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #2e2a60 0%,
+    #3c3278 50%,
+    #2e2a60 100%
+  );
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-animation 1s ease-in-out infinite;
+}
+
+@keyframes skeleton-animation {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}

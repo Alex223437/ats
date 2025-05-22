@@ -63,19 +63,49 @@ async def update_user_broker_settings(
 
 @user_router.get("/user/broker/check")
 async def check_broker_connection(user: User = Depends(get_current_user)):
-    """Проверяет подключение к Alpaca API"""
     try:
         api = get_alpaca_api(user)
         account = api.get_account()
+
+        # Optional: получаем историю торгов для расчета total_pnl
+        try:
+            activities = api.get_activities(activity_types="FILL")
+            pnl_total = 0
+            for act in activities:
+                price = float(act.price)
+                qty = int(act.qty)
+                if act.side == 'sell':
+                    pnl_total += price * qty
+                elif act.side == 'buy':
+                    pnl_total -= price * qty
+        except Exception:
+            pnl_total = None  # на случай, если API не даёт данные
+
+        today_pnl = None
+        try:
+            equity = float(account.equity)
+            last_equity = float(account.last_equity)
+            today_pnl = round(equity - last_equity, 2)
+        except Exception:
+            pass
+
         return {
             "connected": True,
             "data": {
                 "account_status": account.status,
-                "cash": account.cash
+                "cash": float(account.cash),
+                "portfolio_value": float(account.portfolio_value),
+                "buying_power": float(account.buying_power),
+                "today_pnl": today_pnl,
+                "total_pnl": round(pnl_total, 2) if pnl_total is not None else None
             }
         }
+
     except Exception as e:
-        return {"connected": False, "error": str(e)}
+        return {
+            "connected": False,
+            "error": str(e)
+        }
     
 @user_router.delete("/user/broker")
 async def disconnect_broker(

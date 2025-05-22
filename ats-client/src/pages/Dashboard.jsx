@@ -1,5 +1,6 @@
 import AsideDashboard from "../components/AsideComponent/AsideDashboard";
 import ChartComponent from "../components/ChartComponent/ChartComponent";
+import DashboardOverview from "../components/DashboardOverview/DashboardOverview";
 import { fetchUserStocks } from '@/services/stockService';
 import { useEffect, useState } from "react";
 const Dashboard = () => {
@@ -26,13 +27,16 @@ const Dashboard = () => {
         selectedStock={selectedStock}
         setSelectedStock={setSelectedStock}
       />
-      <ChartComponent
-        ticker={selectedStock}
-        setStocks={setStocks}
-        selectedStock={selectedStock}
-        setSelectedStock={setSelectedStock}
-      />
+      <DashboardOverview selectedStock={selectedStock} stocks={stocks}></DashboardOverview>
     </>
+   
   );
 }
 export default Dashboard;
+
+//   <ChartComponent
+    //     ticker={selectedStock}
+    //     setStocks={setStocks}
+    //     selectedStock={selectedStock}
+    //     setSelectedStock={setSelectedStock}
+    //   />

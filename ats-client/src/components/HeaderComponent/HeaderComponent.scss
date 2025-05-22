@@ -51,6 +51,14 @@
       }
     }
 
+    &-link.active {
+      color: #c084fc;
+
+      &::after {
+        width: 100%;
+      }
+    }
+
     &-user {
       display: flex;
       align-items: center;

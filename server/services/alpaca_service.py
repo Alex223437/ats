@@ -1,5 +1,3 @@
-# 📁 server/services/alpaca_service.py
-
 import alpaca_trade_api as tradeapi
 from models.user import User
 
@@ -33,10 +31,10 @@ def place_order(user: User, symbol, qty, side, order_type, time_in_force,
             trail_price=trail_price,
             trail_percent=trail_percent
         )
-        return {"status": "success", "order_id": order.id}
+        return order  # Возвращаем сам объект order (или словарь если хочешь)
     except Exception as e:
-        return {"status": "error", "message": str(e)}
-
+        raise RuntimeError(f"Alpaca order error: {str(e)}")
+    
 def get_positions(user: User):
     api = get_alpaca_api(user)
     positions = api.list_positions()

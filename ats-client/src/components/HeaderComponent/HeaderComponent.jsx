@@ -1,53 +1,81 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './HeaderComponent.scss';
 import logo from '../../assets/logo/logo.png';
+import { toast } from 'react-hot-toast';
 
 const HeaderComponent = ({ user, onLogout }) => {
+
+  const handleLogout = async () => {
+    try {
+      await onLogout();
+      toast.success('You have been logged out');
+    } catch (err) {
+      toast.error('Failed to logout');
+    }
+  };
+
   return (
     <header className="header">
-      <Link to="/">
+      <NavLink to="/">
         <img src={logo} alt="logo" className="header__logo" />
-      </Link>
+      </NavLink>
       <nav className="header__navigation">
         <ul className="header__menu">
           <li className="header__menu-item">
-            <Link to="/" className="header__menu-link">
+            <NavLink to="/" className={({ isActive }) =>
+              `header__menu-link${isActive ? ' active' : ''}`
+            }>
               Dashboard
-            </Link>
+            </NavLink>
           </li>
           <li className="header__menu-item">
-            <Link to="/trades" className="header__menu-link">
+            <NavLink to="/trades" className={({ isActive }) =>
+              `header__menu-link${isActive ? ' active' : ''}`
+            }>
               Trades
-            </Link>
+            </NavLink>
           </li>
           <li className="header__menu-item">
-            <Link to="/strategy" className="header__menu-link">
+            <NavLink to="/strategy" className={({ isActive }) =>
+              `header__menu-link${isActive ? ' active' : ''}`
+            }>
               Strategy
-            </Link>
+            </NavLink>
           </li>
           <li className="header__menu-item">
-            <Link to="/analytics" className="header__menu-link">
+            <NavLink to="/analytics" className={({ isActive }) =>
+              `header__menu-link${isActive ? ' active' : ''}`
+            }>
               Analytics
-            </Link>
+            </NavLink>
           </li>
           <li className="header__menu-item">
-            <Link to="/settings" className="header__menu-link">
+            <NavLink to="/backtest" className={({ isActive }) =>
+              `header__menu-link${isActive ? ' active' : ''}`
+            }>
+              Backtest
+            </NavLink>
+          </li>
+          <li className="header__menu-item">
+            <NavLink to="/settings"className={({ isActive }) =>
+                `header__menu-link${isActive ? ' active' : ''}`
+              }>
               Settings
-            </Link>
+            </NavLink>
           </li>
           {user ? (
             <li className="header__menu-user">
               <span className="header__user">Hello, {user.username || user.email}!</span>
-              <button className="header__logout" onClick={onLogout}>
+              <button className="header__logout" onClick={handleLogout}>
                 Logout
               </button>
             </li>
           ) : (
             <>
               <li className="header__menu-item">
-                <Link className="header__link" to="/register">
+                <NavLink className="header__link" to="/register">
                   Sign up
-                </Link>
+                </NavLink>
               </li>
             </>
           )}

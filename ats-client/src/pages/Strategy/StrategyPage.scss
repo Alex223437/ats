@@ -1,0 +1,8 @@
+.strategy-grid {
+  display: grid;
+  grid-template-columns: 6fr 5fr;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+  padding: 24px 0;
+}

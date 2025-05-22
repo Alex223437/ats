@@ -1,0 +1,31 @@
+.kpi-cards {
+  display: flex;
+  gap: 24px;
+  grid-column: span 2;
+}
+
+.kpi-card {
+  width: 100%;
+  background-color: #1e1b4b;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  height: 100%;
+
+  &__label {
+    font-size: 14px;
+    color: #a5b4fc;
+    margin-bottom: 10px;
+  }
+
+  &__value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+
+    &.negative {
+      color: #f87171;
+    }
+  }
+}

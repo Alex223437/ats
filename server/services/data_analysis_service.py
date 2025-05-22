@@ -5,7 +5,7 @@ from services.strategy_service import StrategyService
 class DataAnalysisService:
     @staticmethod
     def get_strategy_result(ticker: str, strategy_id: str | None = None) -> pd.DataFrame:
-        data = MarketData.download_data(ticker, from_date="2024-01-01", to_date="2025-03-27")
+        data = MarketData.download_data(ticker)
         if data is None or data.empty:
             raise ValueError(f"Could not fetch data for {ticker}")
 
