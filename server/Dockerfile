@@ -17,7 +17,7 @@ WORKDIR /app
 COPY . /app
 COPY requirements.txt /app/requirements.txt
 # dev only
-COPY .env /app/.env 
+# COPY .env /app/.env 
 
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir --upgrade pip && \
@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 EXPOSE 8000
 
 # Запускаем Alembic миграции и потом FastAPI
-# CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT"]
 
 # dev 
-CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
