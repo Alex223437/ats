@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -9,3 +9,7 @@ class UserStock(Base):
     ticker = Column(String, nullable=False)
 
     user = relationship("User", back_populates="stocks")
+    strategy_links = relationship("StrategyTicker", back_populates="user_stock")
+
+
+    __table_args__ = (UniqueConstraint('user_id', 'ticker'),) 

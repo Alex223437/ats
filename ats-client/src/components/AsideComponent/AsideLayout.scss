@@ -1,15 +1,14 @@
 .aside {
-  background-color: rgb(37, 25, 101);
-  width: 300px;
-  position: sticky;
-  top: 50%;
-  left: 0;
-  height: 100%;
+  width: 350px;
+  height: -webkit-fill-available;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   padding: 25px 10px;
-  transform: translateY(-50%);
+  margin: 24px 0 0 0;
+  border-radius: 12px;
+  background-color: #1e1b4b;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 
   &__title {
     text-align: center;
@@ -85,6 +84,7 @@
     gap: 12px;
     margin-top: 20px;
     padding: 0 10px;
+    position: relative;
 
     input {
       background-color: #261d4d; // мягкий тёмный фон
@@ -125,6 +125,26 @@
         transform: scale(0.97);
       }
     }
+    select {
+      background-color: #261d4d;
+      color: #f8fafc;
+      border: 1px solid #3c2cf2;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+      transition: border 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+      }
+
+      option {
+        background-color: #1e1b4b;
+        color: #f8fafc;
+      }
+    }
   }
   &__delete {
     position: absolute;
@@ -139,35 +159,37 @@
     transform: translateY(-50%);
     cursor: pointer;
   }
-}
+  .suggestions-list {
+    background-color: #1e1b4b;
+    border: 1px solid #3c2cf2;
+    border-radius: 10px;
+    padding: 6px 0;
+    margin-top: -5px;
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 20;
+    position: absolute;
+    top: 110%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
 
-.suggestions-list {
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  list-style: none;
-  margin: 0;
-  padding: 5px;
-  position: absolute;
-  width: calc(100% - 20px);
-  max-height: 150px;
-  overflow-y: auto;
-  z-index: 10;
-  top: 40px;
+    li {
+      padding: 10px 14px;
+      cursor: pointer;
+      color: #e0e7ff;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
 
-  li {
-    padding: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
+      &:hover {
+        background-color: rgba(124, 58, 237, 0.2);
+      }
 
-    &:hover {
-      background: #f0f0f0;
+      strong {
+        color: #c4b5fd;
+        font-weight: 600;
+      }
     }
   }
 }
 
-.loading-text {
-  font-size: 14px;
-  color: gray;
-  margin-top: 5px;
-}
+

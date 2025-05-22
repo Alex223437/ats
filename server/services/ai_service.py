@@ -4,7 +4,7 @@ from data.data_preprocessing import preprocess_data
 
 def load_model():
     """Загрузка обученной модели"""
-    with open("server/ai_model/ai_model.pkl", "rb") as f:
+    with open("ai_model/ai_model.pkl", "rb") as f:
         model = pickle.load(f)
     return model
 

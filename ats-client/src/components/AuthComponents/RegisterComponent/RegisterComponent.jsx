@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { registerUser } from '@/services/authService'; // ✅
+import { useAuth } from '@/hooks/useAuth';
+import toast from 'react-hot-toast';
+import LoaderSpinner from '@/components/LoadingComponents/LoaderSpinner';
+import StarIcon from '@/assets/svg/star2.svg?react';
 import './RegisterComponent.scss';
 
 const Register = () => {
@@ -10,63 +13,83 @@ const Register = () => {
     password: '',
   });
 
-  const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const { registerUser, loading, error } = useAuth();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await registerUser(formData); // ✅ Вызов сервиса
-      setMessage('Successfully registered!');
-      setTimeout(() => navigate('/login'), 1500);
-    } catch (error) {
-      setMessage(error.response?.data?.detail || 'Registration failed');
+      await registerUser(formData);
+      toast.success('Successfully registered!');
+      setTimeout(() => navigate('/login'), 1200);
+    } catch (err) {
+      console.error(err);
+      toast.error(error || 'Registration failed');
     }
   };
 
   return (
     <div className="register-container">
-    <h2>Sign Up</h2>
-    <form onSubmit={handleSubmit}>
-      <input
-        name="username"
-        type="text"
-        placeholder="Username"
-        value={formData.username}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="email"
-        type="email"
-        placeholder="Email"
-        value={formData.email}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={handleChange}
-        required
-      />
-      <button type="submit">Sign Up</button>
-    </form>
-    {message && <p className="error">{message}</p>}
+      <h2>Sign Up</h2>
+      <form className="register-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Username</label>
+          <input
+            name="username"
+            type="text"
+            placeholder="yourname"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-    <p className="register-link">
-      Already have an account? <Link to="/login">Log in</Link>
-    </p>
-  </div>
+        <div className="form-group">
+          <label>Email address</label>
+          <input
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Password</label>
+          <input
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <button type="submit" className="submit-btn" disabled={loading}>
+          {loading ? 'Signing up...' : 'Sign Up'}
+        </button>
+
+        {loading && <div className="register-loader"><LoaderSpinner /></div>}
+      </form>
+
+      <div className="register-icon">
+        <StarIcon />
+      </div>
+
+      <p className="register-link">
+        Already have an account? <Link to="/login">Log in</Link>
+      </p>
+    </div>
   );
 };
 

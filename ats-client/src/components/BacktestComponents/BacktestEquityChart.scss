@@ -1,0 +1,60 @@
+.equity-chart-card {
+  background-color: #1e1b4b;
+  border-radius: 16px;
+  padding: 20px 20px 20px 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  width: 100%;
+
+  &__title {
+    margin-left: 20px;
+    font-size: 14px;
+    color: #a5b4fc;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .recharts-tooltip-wrapper {
+    z-index: 10;
+  }
+
+  .recharts-tooltip-label {
+    color: #c4b5fd;
+    font-weight: 600;
+  }
+
+  .recharts-tooltip-item {
+    color: #e0e7ff;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    fill: #e0e7ff;
+    font-size: 12px;
+  }
+
+  .recharts-line {
+    stroke: #7c3aed;
+    stroke-width: 3px;
+  }
+
+  .recharts-line .recharts-dot {
+    display: none;
+  }
+}
+
+.loader-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.empty-chart {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 14px;
+  font-style: italic;
+}

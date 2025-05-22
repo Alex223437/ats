@@ -15,3 +15,4 @@ class User(Base):
     alpaca_api_key = Column(String, nullable=True)
     alpaca_api_secret = Column(String, nullable=True)
     alpaca_base_url = Column(String, nullable=True)
+    signals = relationship("SignalLog", back_populates="user", cascade="all, delete-orphan")

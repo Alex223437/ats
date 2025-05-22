@@ -1,8 +1,11 @@
 import api from './apiService';
 
-export const fetchStockData = async (ticker, strategyId = null) => {
+export const fetchStockData = async (ticker, strategyId = null, raw = false) => {
   try {
-    const params = strategyId ? { strategy_id: strategyId } : {};
+    const params = {};
+    if (strategyId) params.strategy_id = strategyId;
+    if (raw) params.raw = true;
+
     const response = await api.get(`/api/data/${ticker}`, { params });
     return response.data.data;
   } catch (error) {
@@ -13,13 +16,8 @@ export const fetchStockData = async (ticker, strategyId = null) => {
 
 // Fetch user stocks
 export const fetchUserStocks = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) return [];
-
   try {
-    const response = await api.get('/users/me/stocks', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.get('/users/me/stocks');
     return response.data.stocks;
   } catch (error) {
     console.error('Error fetching user stocks:', error.response?.data || error.message);
@@ -29,13 +27,9 @@ export const fetchUserStocks = async () => {
 
 // Add a stock
 export const addUserStock = async (ticker) => {
-  const token = localStorage.getItem('token');
-  if (!token) return;
-
   try {
     await api.post('/users/me/stocks/add', null, {
       params: { ticker },
-      headers: { Authorization: `Bearer ${token}` },
     });
   } catch (error) {
     console.error('Error adding stock:', error.response?.data || error.message);
@@ -44,13 +38,9 @@ export const addUserStock = async (ticker) => {
 
 // Remove a stock
 export const removeUserStock = async (ticker) => {
-  const token = localStorage.getItem('token');
-  if (!token) return;
-
   try {
     await api.delete('/users/me/stocks/remove', {
       params: { ticker },
-      headers: { Authorization: `Bearer ${token}` },
     });
   } catch (error) {
     console.error('Error removing stock:', error.response?.data || error.message);
@@ -75,4 +65,9 @@ export const fetchIndicators = async (ticker) => {
     console.error('Ошибка загрузки индикаторов:', error);
     return null;
   }
+};
+
+export const fetchTickerOverview = async () => {
+  const response = await api.get('/stocks/overview', { withCredentials: true });
+  return response.data;
 };

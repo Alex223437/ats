@@ -42,7 +42,7 @@ class StrategyService:
             return pd.DataFrame()
 
         if db is None:
-            from server.database import get_db  # Импорт только если db не передан
+            from database import get_db  # Импорт только если db не передан
             db = next(get_db())  
 
         strategy = db.query(Strategy).filter(Strategy.id == strategy_id).first()

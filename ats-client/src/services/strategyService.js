@@ -12,7 +12,6 @@ export const fetchStrategies = async () => {
 
 export const createStrategy = async (strategy) => {
   try {
-    console.log('Creating strategy:', strategy);
     const response = await api.post('/strategies', strategy);
     return response.data;
   } catch (error) {
@@ -52,5 +51,25 @@ export const disableStrategy = async (strategyId) => {
     await api.put(`/strategies/${strategyId}/disable`);
   } catch (error) {
     console.error('Error disabling strategy:', error);
+  }
+};
+
+// 🆕 Связь стратегии и тикеров
+export const setStrategyTickers = async (strategyId, tickers) => {
+  try {
+    await api.post(`/strategies/${strategyId}/tickers`, { tickers });
+  } catch (error) {
+    console.error('Error setting strategy tickers:', error);
+  }
+};
+
+// 🆕 Получить тикеры для конкретной стратегии
+export const fetchStrategyTickers = async (strategyId) => {
+  try {
+    const response = await api.get(`/strategies/${strategyId}/tickers`);
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching strategy tickers:', error);
+    return [];
   }
 };
