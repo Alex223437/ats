@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TradeForm from '../../components/TradesComponent/TradeForm';
-import OrdersTable from '../../components/TradesComponent/OrdersTable';
-import PositionsTable from '../../components/TradesComponent/PositionsTable';
+import TradeForm from '@/components/TradesComponent/TradeForm';
+import OrdersTable from '@/components/TradesComponent/OrdersTable';
+import PositionsTable from '@/components/TradesComponent/PositionsTable';
+import { useBrokerApi } from '@/hooks/useBrokerApi';
 import useApiRequest from '@/hooks/useApiRequest';
 import StarIcon from '@/assets/svg/star1.svg?react';
+import LoaderSpinner from '@/components/LoadingComponents/LoaderSpinner';
 import toast from 'react-hot-toast';
 import './TradingPage.scss';
 
 const TradingPage = () => {
-  const [connected, setConnected] = useState(null);
-  const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const defaultBroker = 'alpaca';
+
+  const [connected, setConnected] = useState(null); // null → инициализация
+  const [message, setMessage] = useState('');
+  const [longLoad, setLongLoad] = useState(false);
+
+  const { checkBroker } = useBrokerApi();
 
   const {
     data: orders,
@@ -25,19 +32,16 @@ const TradingPage = () => {
     request: fetchPositions
   } = useApiRequest();
 
-  const {
-    data: broker,
-    request: fetchBroker
-  } = useApiRequest();
-
   useEffect(() => {
+    const timer = setTimeout(() => setLongLoad(true), 8000);
+
     const load = async () => {
       try {
-        const res = await fetchBroker({ method: 'get', url: '/user/broker/check' });
+        const res = await checkBroker(defaultBroker);
         if (res.connected) {
           setConnected(true);
-          fetchOrders({ method: 'get', url: '/orders' });
-          fetchPositions({ method: 'get', url: '/trades' });
+          await fetchOrders({ method: 'get', url: '/orders' });
+          await fetchPositions({ method: 'get', url: '/trades' });
         } else {
           setConnected(false);
           setMessage(res.error || 'Broker not connected');
@@ -45,10 +49,27 @@ const TradingPage = () => {
       } catch (err) {
         setConnected(false);
         setMessage('Failed to verify broker connection');
+      } finally {
+        clearTimeout(timer);
       }
     };
+
     load();
   }, []);
+
+  // Пока идёт первичная проверка → показываем прелоадер
+  if (connected === null) {
+    return (
+      <div className="loading-overlay">
+        <LoaderSpinner size={90} color="#c084fc" />
+        {longLoad && (
+          <p className="loading-text">
+            The server is responding slowly. If the page doesn’t load within a minute, please contact the developer.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   if (connected === false) {
     return (
@@ -66,6 +87,7 @@ const TradingPage = () => {
   return (
     <div className="trading-grid">
       <TradeForm onOrderPlaced={() => fetchOrders({ method: 'get', url: '/orders' })} />
+
       <OrdersTable
         orders={orders || []}
         loading={loadingOrders}

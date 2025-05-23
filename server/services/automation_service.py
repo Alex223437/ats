@@ -5,7 +5,6 @@ from models.signal_log import SignalLog
 from models.trade_log import TradeLog
 from models.strategy_ticker import StrategyTicker
 from services.strategy_service import StrategyService
-from services.broker_factory import get_alpaca_api
 from data.automation_data import fetch_intraday_alpaca
 from services.alpaca_service import place_order
 from sqlalchemy.orm import Session

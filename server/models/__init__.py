@@ -5,3 +5,5 @@ from models.trade_log import TradeLog
 from models.backtest_result import BacktestResult
 from models.signal_log import SignalLog
 from models.strategy_ticker import StrategyTicker
+from models.broker import UserBroker
+from models.user_preferences import UserPreferences

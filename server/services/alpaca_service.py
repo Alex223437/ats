@@ -1,24 +1,26 @@
-import alpaca_trade_api as tradeapi
-from models.user import User
+from models.broker import UserBroker
+from services.broker_factory import get_api_client
 
-def get_alpaca_api(user: User):
-    """Инициализация клиента Alpaca по ключам пользователя"""
-    return tradeapi.REST(
-        user.alpaca_api_key,
-        user.alpaca_api_secret,
-        user.alpaca_base_url,
-        api_version='v2'
-    )
 
-def check_account(user: User):
-    api = get_alpaca_api(user)
+def check_account(broker: UserBroker):
+    api = get_api_client(broker)
     account = api.get_account()
     return {"cash": account.cash, "status": account.status}
 
-def place_order(user: User, symbol, qty, side, order_type, time_in_force,
-                limit_price=None, stop_price=None,
-                trail_price=None, trail_percent=None):
-    api = get_alpaca_api(user)
+
+def place_order(
+    broker: UserBroker,
+    symbol: str,
+    qty: int,
+    side: str,
+    order_type: str,
+    time_in_force: str,
+    limit_price: float = None,
+    stop_price: float = None,
+    trail_price: float = None,
+    trail_percent: float = None
+):
+    api = get_api_client(broker)
     try:
         order = api.submit_order(
             symbol=symbol,
@@ -29,14 +31,15 @@ def place_order(user: User, symbol, qty, side, order_type, time_in_force,
             limit_price=limit_price,
             stop_price=stop_price,
             trail_price=trail_price,
-            trail_percent=trail_percent
+            trail_percent=trail_percent,
         )
-        return order  # Возвращаем сам объект order (или словарь если хочешь)
+        return order
     except Exception as e:
         raise RuntimeError(f"Alpaca order error: {str(e)}")
-    
-def get_positions(user: User):
-    api = get_alpaca_api(user)
+
+
+def get_positions(broker: UserBroker):
+    api = get_api_client(broker)
     positions = api.list_positions()
     return [
         {
@@ -51,8 +54,9 @@ def get_positions(user: User):
         for pos in positions
     ]
 
-def get_open_orders(user: User):
-    api = get_alpaca_api(user)
+
+def get_open_orders(broker: UserBroker):
+    api = get_api_client(broker)
     orders = api.list_orders(status="open")
     return [
         {
@@ -70,16 +74,18 @@ def get_open_orders(user: User):
         for order in orders
     ]
 
-def cancel_order(user: User, order_id):
-    api = get_alpaca_api(user)
+
+def cancel_order(broker: UserBroker, order_id: str):
+    api = get_api_client(broker)
     try:
         api.cancel_order(order_id)
         return {"status": "success", "message": f"Order {order_id} canceled"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def close_position(user: User, symbol):
-    api = get_alpaca_api(user)
+
+def close_position(broker: UserBroker, symbol: str):
+    api = get_api_client(broker)
     try:
         api.close_position(symbol)
         return {"status": "success", "message": f"Position {symbol} closed"}

@@ -1,10 +1,18 @@
-from fastapi import APIRouter
-from services.alpaca_service import get_positions, place_order
-from fastapi import Depends
-from routes.auth import get_current_user
-from services.alpaca_service import get_positions, get_open_orders, place_order, cancel_order, close_position
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from models import User, UserBroker
+from database import get_db
+from services.alpaca_service import (
+    get_positions,
+    get_open_orders,
+    place_order,
+    cancel_order,
+    close_position
+)
 from pydantic import BaseModel
-from models.user import User
+from routes.auth import get_current_user
+
+trades_router = APIRouter()
 
 class OrderSchema(BaseModel):
     symbol: str
@@ -17,27 +25,56 @@ class OrderSchema(BaseModel):
     trail_price: float | None = None
     trail_percent: float | None = None
 
-
-trades_router = APIRouter()
-
+def get_broker_or_404(user: User, db: Session) -> UserBroker:
+    broker = db.query(UserBroker).filter_by(user_id=user.id, broker="alpaca").first()
+    if not broker:
+        raise HTTPException(status_code=404, detail="Alpaca broker not connected")
+    return broker
 
 
 @trades_router.get("/trades")
-async def get_trades(user: User = Depends(get_current_user)):
-    return get_positions(user)
+async def get_trades(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    broker = get_broker_or_404(user, db)
+    return get_positions(broker)
+
 
 @trades_router.get("/orders")
-async def get_orders(user: User = Depends(get_current_user)):
-    return get_open_orders(user)
+async def get_orders(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    broker = get_broker_or_404(user, db)
+    return get_open_orders(broker)
+
 
 @trades_router.post("/orders")
-async def create_order(order: OrderSchema, user: User = Depends(get_current_user)):
-    return place_order(user, **order.dict())
+async def create_order(
+    order: OrderSchema,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    broker = get_broker_or_404(user, db)
+    return place_order(broker, **order.dict())
+
 
 @trades_router.delete("/orders/{order_id}")
-async def delete_order(order_id: str, user: User = Depends(get_current_user)):
-    return cancel_order(user, order_id)
+async def delete_order(
+    order_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    broker = get_broker_or_404(user, db)
+    return cancel_order(broker, order_id)
+
 
 @trades_router.delete("/trades/{symbol}")
-async def delete_trade(symbol: str, user: User = Depends(get_current_user)):
-    return close_position(user, symbol)
+async def delete_trade(
+    symbol: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    broker = get_broker_or_404(user, db)
+    return close_position(broker, symbol)

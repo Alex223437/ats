@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  updateBrokerSettings,
-  getUserSettings,
-  checkBrokerConnection,
-  disconnectBroker
-} from '../../services/userService';
+import useBrokerApi from '@/hooks/useBrokerApi';
 import './SettingsAPI.scss';
 
 const SettingsAPI = () => {
@@ -13,47 +8,46 @@ const SettingsAPI = () => {
   const [apiSecret, setApiSecret] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
   const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
   const [connected, setConnected] = useState(false);
   const [accountInfo, setAccountInfo] = useState(null);
 
+  const { checkState, updateBroker, disconnectBroker, checkBroker, loading } = useBrokerApi();
+
   useEffect(() => {
     const init = async () => {
-      const result = await checkBrokerConnection();
+      const result = await checkBroker(broker);
       if (result.connected) {
         setConnected(true);
-        setAccountInfo(result.data);
+        setAccountInfo(result);
       } else {
         setConnected(false);
-        const data = await getUserSettings();
-        if (data) {
-          setApiKey(data.alpaca_api_key || '');
-          setApiSecret(data.alpaca_api_secret || '');
-          setBaseUrl(data.alpaca_base_url || '');
+        const fallback = await checkState(); // legacy fallback
+        if (fallback) {
+          setApiKey(fallback.alpaca_api_key || '');
+          setApiSecret(fallback.alpaca_api_secret || '');
+          setBaseUrl(fallback.alpaca_base_url || '');
         }
         setMessage(result.error || '');
       }
     };
 
     init();
-  }, []);
+  }, [broker]);
 
   const handleSave = async () => {
-    setLoading(true);
     setMessage('');
-
-    const result = await updateBrokerSettings({
+    const result = await updateBroker({
       broker,
       api_key: apiKey,
       api_secret: apiSecret,
-      base_url: baseUrl,
+      base_url: baseUrl
     });
 
     if (result.success) {
-      const check = await checkBrokerConnection();
-      if (check.connected && check.data?.account_status && check.data?.cash !== undefined) {
+      const check = await checkBroker(broker);
+      if (check.connected && check.account_status && check.cash !== undefined) {
         setConnected(true);
-        setAccountInfo(check.data);
+        setAccountInfo(check);
         setMessage('✅ Connected!');
       } else {
         setMessage('✅ Keys updated, but not connected. Please check your API keys.');
@@ -61,15 +55,12 @@ const SettingsAPI = () => {
     } else {
       setMessage('❌ Failed to save settings. Please check your API keys.');
     }
-
-    setLoading(false);
   };
 
   const handleDisconnect = async () => {
-    const confirmed = window.confirm('Are you sure you want to disconnect your broker?');
-    if (!confirmed) return;
+    if (!window.confirm('Are you sure you want to disconnect your broker?')) return;
 
-    const result = await disconnectBroker();
+    const result = await disconnectBroker(broker);
     if (result.success) {
       setApiKey('');
       setApiSecret('');
@@ -85,15 +76,13 @@ const SettingsAPI = () => {
   return (
     <>
       <h2>API Broker Settings</h2>
-  
+
       {connected ? (
         <>
           <p className="message">
             ✅ Connected to Alpaca — <strong>{accountInfo.account_status}</strong>, Cash: ${parseFloat(accountInfo.cash).toFixed(2)}
           </p>
-          <button onClick={handleDisconnect}>
-            ❌ Disconnect Broker
-          </button>
+          <button onClick={handleDisconnect}>❌ Disconnect Broker</button>
         </>
       ) : (
         <div className="settings-form">
@@ -101,20 +90,20 @@ const SettingsAPI = () => {
           <select value={broker} onChange={(e) => setBroker(e.target.value)}>
             <option value="alpaca">Alpaca</option>
           </select>
-  
+
           <label>API Key</label>
           <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-  
+
           <label>API Secret</label>
           <input value={apiSecret} onChange={(e) => setApiSecret(e.target.value)} type="password" />
-  
+
           <label>Base URL</label>
           <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
-  
+
           <button onClick={handleSave} disabled={loading}>
             {loading ? 'Saving...' : 'Save'}
           </button>
-  
+
           {message && <p className="message">{message}</p>}
         </div>
       )}
