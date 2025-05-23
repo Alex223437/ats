@@ -18,6 +18,7 @@ async def get_user_settings(user: User = Depends(get_current_user)):
     return {
         "username": user.username,
         "email": user.email,
+        "created_at": user.created_at,
     }
 
 

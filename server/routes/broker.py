@@ -34,10 +34,7 @@ def connect_broker(
     db.add(new_broker)
     db.commit()
     db.refresh(new_broker)
-    return {
-        "success": True,
-        "data": BrokerConnectionResponse.from_orm(new_broker)
-    }
+    return BrokerConnectionResponse.from_orm(new_broker)
 
 
 @broker_router.get("", response_model=list[BrokerConnectionResponse])

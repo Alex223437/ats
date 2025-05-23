@@ -18,6 +18,7 @@ from routes.signal import signals_router
 from routes.analytics import analytics_router
 from routes.broker import broker_router
 from routes.preferences import preferences_router
+from routes.settings import settings_router
 
 # Import scheduler
 from scheduler import start_strategy_scheduler
@@ -48,7 +49,7 @@ app.include_router(signals_router)
 app.include_router(analytics_router)
 app.include_router(broker_router)
 app.include_router(preferences_router)
-
+app.include_router(settings_router)
 
 
 if __name__ == "__main__":

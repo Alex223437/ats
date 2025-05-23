@@ -33,6 +33,7 @@ class UserSettingsUpdate(BaseModel):
 class UserSettingsResponse(BaseModel):
     username: str
     email: EmailStr
+    created_at: datetime
 
 
 class UserBrokerSettingsUpdate(BaseModel):

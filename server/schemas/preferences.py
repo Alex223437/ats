@@ -21,3 +21,9 @@ class TradingPreferencesUpdate(BaseModel):
     use_percentage: Optional[bool] = None
     default_stop_loss: Optional[float] = None
     default_take_profit: Optional[float] = None
+
+class NotificationSettings(BaseModel):
+    email_alerts_enabled: bool = True
+    notify_on_signal: bool = True
+    notify_on_order_filled: bool = True
+    notify_on_error: bool = True
