@@ -10,6 +10,7 @@ class Signal(BaseModel):
 
 class StrategyBase(BaseModel):
     title: str
+    strategy_type: Literal["custom", "ml_rf", "ml_tf"] = "custom"
     buy_signals: List[Signal]
     sell_signals: List[Signal]
     market_check_frequency: str
@@ -58,4 +59,3 @@ class StrategyResponse(StrategyBase):
 
 class StrategyTickerLink(BaseModel):
     tickers: List[str]
-

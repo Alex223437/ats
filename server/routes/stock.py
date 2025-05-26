@@ -22,7 +22,7 @@ async def get_stock_data(
 ):
     try:
         if raw:
-            result = await asyncio.to_thread(MarketData.download_data, ticker)
+            result = await asyncio.to_thread(MarketData.download_data, ticker, 1, 'day')
         else:
             result = await asyncio.to_thread(DataAnalysisService.get_strategy_result, ticker, strategy_id)
 

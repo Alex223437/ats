@@ -5,6 +5,12 @@ from sqlalchemy.orm import Session
 from data.alpaca_data import fetch_history_alpaca
 import pandas as pd
 from utils.strategy_evaluator import eval_expr
+from services.ml_models.rf_service import predict_rf
+from services.ml_models.tf_service import predict_tf
+from data.data_preprocessing import prepare_features_for_ml
+from services.ml_models.tf_service import tf_model, tf_scaler
+from data.market_data import MarketData
+
 import numpy as np
 
 def build_expr(signals):
@@ -91,6 +97,8 @@ def simulate_strategy(strategy: Strategy, df: pd.DataFrame):
     pnl = 0
     trade_pnls = []
 
+    use_ml = strategy.strategy_type in ("ml_rf", "ml_tf")
+
     for index, row in df.iterrows():
         current_price = row["Close"]
 
@@ -128,6 +136,66 @@ def simulate_strategy(strategy: Strategy, df: pd.DataFrame):
                 position = None
                 continue
 
+       # === Machine Learning Predictions ===
+        if use_ml:
+            last_slice = df.loc[:index].tail(50).dropna()
+            if len(last_slice) < 5:
+                print(f"⚠️ Недостаточно данных для ML предсказания на {index}")
+                continue
+
+            ml_df = last_slice.drop(columns=["Buy", "Sell"], errors="ignore")
+            ml_df = MarketData.calculate_indicators(ml_df)
+
+            prediction = None
+
+            if strategy.strategy_type == "ml_rf":
+                prediction = predict_rf(ml_df)
+
+            elif strategy.strategy_type == "ml_tf":
+                print(f"📦 tf_model: {tf_model}")
+                X_scaled, _ = prepare_features_for_ml(ml_df, tf_scaler)
+                if X_scaled.shape[0] == 0:
+                    continue
+                probs = predict_tf(X_scaled[-1:])
+                pred_class = np.argmax(probs[0])
+                print(f"🔮 predict_tf raw prediction: {pred_class} (probs: {probs[0]})")
+                prediction = {1: "buy", 2: "sell"}.get(pred_class, "hold")
+
+            # === Логика торговли по AI ===
+            if prediction == "buy":
+                if position == "short":
+                    exit_price = current_price
+                    trade_pnl = entry_price - exit_price
+                    trades_log.append({
+                        "action": "buy", "price": round(exit_price, 2), "result": "closed", "pnl": round(trade_pnl, 2), "time": index
+                    })
+                    pnl += trade_pnl
+                    trade_pnls.append(trade_pnl)
+                    position = None
+                if position is None:
+                    position = "long"
+                    entry_price = current_price
+                    trades_log.append({
+                        "action": "buy", "price": round(entry_price, 2), "result": "opened", "pnl": 0, "time": index
+                    })
+
+            elif prediction == "sell":
+                if position == "long":
+                    exit_price = current_price
+                    trade_pnl = exit_price - entry_price
+                    trades_log.append({
+                        "action": "sell", "price": round(exit_price, 2), "result": "closed", "pnl": round(trade_pnl, 2), "time": index
+                    })
+                    pnl += trade_pnl
+                    trade_pnls.append(trade_pnl)
+                    position = None
+                if position is None:
+                    position = "short"
+                    entry_price = current_price
+                    trades_log.append({
+                        "action": "sell", "price": round(entry_price, 2), "result": "opened", "pnl": 0, "time": index
+                    })
+
         # === Open Long ===
         if row["Buy"] and position is None:
             position = 'long'
@@ -162,17 +230,20 @@ def simulate_strategy(strategy: Strategy, df: pd.DataFrame):
             trade_pnls.append(trade_pnl)
             continue
 
-    df["Equity"] = df["Close"].pct_change().fillna(0)
-    df["Strategy"] = df["Equity"] * df["Buy"].astype(int)
-
-    cumulative = 0
     equity_curve = []
-    for d, v in df["Strategy"].items():
-        cumulative += v
-        equity_curve.append({"date": d.isoformat(), "pnl": round(cumulative, 4)})
+    cumulative = 0
+
+    # Мапа: дата → pnl по сделке
+    trade_pnl_map = {t["time"]: t["pnl"] for t in trades_log if t["result"] in ("closed", "stop_loss", "take_profit")}
+
+    for index in df.index:
+        pnl_step = trade_pnl_map.get(index, 0)
+        cumulative += pnl_step
+        equity_curve.append({"date": index.isoformat(), "pnl": round(cumulative, 4)})
 
     win_rate = (np.array(trade_pnls) > 0).mean() * 100 if trade_pnls else 0
-    sharpe_ratio = (np.mean(df["Strategy"]) / np.std(df["Strategy"])) * np.sqrt(252) if np.std(df["Strategy"]) > 0 else 0
+    returns = [t["pnl"] for t in trades_log if t["result"] in ("closed", "stop_loss", "take_profit")]
+    sharpe_ratio = (np.mean(returns) / np.std(returns)) * np.sqrt(252) if len(returns) > 1 and np.std(returns) > 0 else 0
 
     peak = max_drawdown = 0
     curve = [point["pnl"] for point in equity_curve]
