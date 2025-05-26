@@ -23,7 +23,7 @@ from routes.settings import settings_router
 # Import scheduler
 from scheduler import start_strategy_scheduler
 
-start_strategy_scheduler()
+# start_strategy_scheduler()
 
 app = FastAPI()
 

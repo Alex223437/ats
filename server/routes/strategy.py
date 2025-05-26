@@ -8,7 +8,7 @@ from models.user import User
 from models.stock import UserStock
 from models.signal_log import SignalLog
 from routes.auth import get_current_user
-from schemas.strategy import StrategyCreate, StrategyResponse, StrategyTickerLink, TickerWithSignal
+from schemas.strategy import StrategyCreate, StrategyResponse, StrategyTickerLink
 
 strategy_router = APIRouter()
 
@@ -31,13 +31,17 @@ def get_strategies(user: User = Depends(get_current_user), db: Session = Depends
             automation_mode=s.automation_mode,
             signal_logic=s.signal_logic,
             confirmation_candles=s.confirmation_candles,
-            notify_on_signal=s.notify_on_signal,
-            auto_trade=s.auto_trade,
             order_type=s.order_type,
+            use_notional=s.use_notional,
             trade_amount=s.trade_amount,
+            use_balance_percent=s.use_balance_percent,
+            stop_loss=s.stop_loss,
+            take_profit=s.take_profit,
+            sl_tp_is_percent=s.sl_tp_is_percent,
+            default_timeframe=s.default_timeframe,
             is_enabled=s.is_enabled,
-            tickers=[link.user_stock.ticker for link in s.tickers if link.user_stock],
             last_checked=s.last_checked,
+            tickers=[link.user_stock.ticker for link in s.tickers if link.user_stock]
         )
         for s in strategies
     ]
@@ -51,9 +55,24 @@ def create_strategy(strategy: StrategyCreate, user: User = Depends(get_current_u
 
     return StrategyResponse(
         id=new_strategy.id,
+        title=new_strategy.title,
+        buy_signals=new_strategy.buy_signals,
+        sell_signals=new_strategy.sell_signals,
+        market_check_frequency=new_strategy.market_check_frequency,
+        automation_mode=new_strategy.automation_mode,
+        signal_logic=new_strategy.signal_logic,
+        confirmation_candles=new_strategy.confirmation_candles,
+        order_type=new_strategy.order_type,
+        use_notional=new_strategy.use_notional,
+        trade_amount=new_strategy.trade_amount,
+        use_balance_percent=new_strategy.use_balance_percent,
+        stop_loss=new_strategy.stop_loss,
+        take_profit=new_strategy.take_profit,
+        sl_tp_is_percent=new_strategy.sl_tp_is_percent,
+        default_timeframe=new_strategy.default_timeframe,
         is_enabled=new_strategy.is_enabled,
-        tickers=[],
-        **strategy.dict()
+        last_checked=new_strategy.last_checked,
+        tickers=[]
     )
 
 @strategy_router.put("/strategies/{strategy_id}", response_model=StrategyResponse)
@@ -72,9 +91,24 @@ def update_strategy(strategy_id: int, strategy: StrategyCreate, user: User = Dep
 
     return StrategyResponse(
         id=db_strategy.id,
+        title=db_strategy.title,
+        buy_signals=db_strategy.buy_signals,
+        sell_signals=db_strategy.sell_signals,
+        market_check_frequency=db_strategy.market_check_frequency,
+        automation_mode=db_strategy.automation_mode,
+        signal_logic=db_strategy.signal_logic,
+        confirmation_candles=db_strategy.confirmation_candles,
+        order_type=db_strategy.order_type,
+        use_notional=db_strategy.use_notional,
+        trade_amount=db_strategy.trade_amount,
+        use_balance_percent=db_strategy.use_balance_percent,
+        stop_loss=db_strategy.stop_loss,
+        take_profit=db_strategy.take_profit,
+        sl_tp_is_percent=db_strategy.sl_tp_is_percent,
+        default_timeframe=db_strategy.default_timeframe,
         is_enabled=db_strategy.is_enabled,
-        tickers=tickers,
-        **strategy.dict()
+        last_checked=db_strategy.last_checked,
+        tickers=tickers
     )
 
 @strategy_router.delete("/strategies/{strategy_id}")
@@ -106,13 +140,17 @@ def get_active_strategies(user: User = Depends(get_current_user), db: Session = 
             automation_mode=s.automation_mode,
             signal_logic=s.signal_logic,
             confirmation_candles=s.confirmation_candles,
-            notify_on_signal=s.notify_on_signal,
-            auto_trade=s.auto_trade,
             order_type=s.order_type,
+            use_notional=s.use_notional,
             trade_amount=s.trade_amount,
+            use_balance_percent=s.use_balance_percent,
+            stop_loss=s.stop_loss,
+            take_profit=s.take_profit,
+            sl_tp_is_percent=s.sl_tp_is_percent,
+            default_timeframe=s.default_timeframe,
             is_enabled=s.is_enabled,
-            tickers=[link.user_stock.ticker for link in s.tickers if link.user_stock],
             last_checked=s.last_checked,
+            tickers=[link.user_stock.ticker for link in s.tickers if link.user_stock]
         )
         for s in strategies
     ]
@@ -138,11 +176,7 @@ def disable_strategy(strategy_id: int, user: User = Depends(get_current_user), d
     return {"success": True, "message": "Strategy disabled"}
 
 @strategy_router.get("/strategies/{strategy_id}/tickers")
-def get_strategy_tickers(
-    strategy_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+def get_strategy_tickers(strategy_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     strategy = (
         db.query(Strategy)
         .filter(Strategy.id == strategy_id, Strategy.user_id == user.id)
@@ -155,12 +189,7 @@ def get_strategy_tickers(
     return [link.user_stock.ticker for link in strategy.tickers if link.user_stock]
 
 @strategy_router.post("/strategies/{strategy_id}/tickers")
-def assign_tickers_to_strategy(
-    strategy_id: int,
-    payload: StrategyTickerLink,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+def assign_tickers_to_strategy(strategy_id: int, payload: StrategyTickerLink, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     strategy = db.query(Strategy).filter_by(id=strategy_id, user_id=user.id).first()
     if not strategy:
         raise HTTPException(status_code=404, detail="Strategy not found")
@@ -182,12 +211,7 @@ def assign_tickers_to_strategy(
     return {"message": f"{len(payload.tickers)} tickers linked to strategy"}
 
 @strategy_router.get("/strategies/{strategy_id}/logs")
-def get_strategy_logs(
-    strategy_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    limit: int = 20
-):
+def get_strategy_logs(strategy_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db), limit: int = 20):
     strategy = db.query(Strategy).filter_by(id=strategy_id, user_id=user.id).first()
     if not strategy:
         raise HTTPException(status_code=404, detail="Strategy not found")

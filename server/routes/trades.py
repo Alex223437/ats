@@ -11,19 +11,38 @@ from services.alpaca_service import (
 )
 from pydantic import BaseModel
 from routes.auth import get_current_user
+from pydantic import BaseModel, model_validator
+from typing import Optional
 
 trades_router = APIRouter()
 
 class OrderSchema(BaseModel):
     symbol: str
-    qty: int
-    side: str  # buy / sell
-    order_type: str  # market / limit / stop / stop_limit / trailing_stop
-    time_in_force: str  # gtc / day
-    limit_price: float | None = None
-    stop_price: float | None = None
-    trail_price: float | None = None
-    trail_percent: float | None = None
+    side: str
+    order_type: str
+    time_in_force: str
+
+    qty: Optional[float] = None
+    notional: Optional[float] = None
+
+    limit_price: Optional[float] = None
+    stop_price: Optional[float] = None
+    trail_price: Optional[float] = None
+    trail_percent: Optional[float] = None
+
+    @model_validator(mode="after")
+    def validate_qty_or_notional(self):
+        if not self.qty and not self.notional:
+            raise ValueError("Either 'qty' or 'notional' must be provided")
+
+        if self.qty and self.notional:
+            raise ValueError("You cannot provide both 'qty' and 'notional'")
+
+        if self.notional:
+            if self.order_type != "market" or self.time_in_force != "day":
+                raise ValueError("Notional orders are only allowed with 'market' order type and 'day' time in force")
+
+        return self
 
 def get_broker_or_404(user: User, db: Session) -> UserBroker:
     broker = db.query(UserBroker).filter_by(user_id=user.id, broker="alpaca").first()

@@ -20,4 +20,4 @@ class BacktestResult(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    strategy = relationship("Strategy", backref="backtests")
+    strategy = relationship("Strategy", back_populates="backtest_results")

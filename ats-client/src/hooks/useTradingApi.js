@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useBrokerApi from './useBrokerApi';
 import useApiRequest from './useApiRequest';
 
@@ -7,14 +7,18 @@ const useTradingApi = (broker = 'alpaca') => {
 
   const [connected, setConnected] = useState(null);
   const [brokerError, setBrokerError] = useState('');
+  const [initialLoaded, setInitialLoaded] = useState(false);
+
+  const hasLoaded = useRef(false); // ✅ защита
 
   const { data: orders, loading: loadingOrders, request: fetchOrders } = useApiRequest();
 
   const { data: positions, loading: loadingPositions, request: fetchPositions } = useApiRequest();
 
-  const [initialLoaded, setInitialLoaded] = useState(false);
-
   useEffect(() => {
+    if (hasLoaded.current) return; // ⛔ уже было вызвано
+    hasLoaded.current = true; // ✅ больше не вызывать
+
     const load = async () => {
       try {
         const res = await checkBroker(broker);
@@ -28,7 +32,7 @@ const useTradingApi = (broker = 'alpaca') => {
           setConnected(false);
           setBrokerError(res.error || 'Broker not connected');
         }
-      } catch (err) {
+      } catch {
         setConnected(false);
         setBrokerError('Failed to verify broker connection');
       } finally {

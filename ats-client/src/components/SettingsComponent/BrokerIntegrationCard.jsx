@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import useSettingsApi from '@/hooks/useSettingsApi';
 import toast from 'react-hot-toast';
 import LoaderSpinner from '@/components/LoadingComponents/LoaderSpinner';
+import ConfirmModal from '../ModalComponent/ConfirmModal';
 
 const BrokerIntegrationCard = () => {
   const {
@@ -18,6 +19,7 @@ const BrokerIntegrationCard = () => {
   const [apiSecret, setApiSecret] = useState('');
   const [baseUrl, setBaseUrl] = useState('https://paper-api.alpaca.markets');
   const [connected, setConnected] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchBroker().then((res) => {
@@ -48,16 +50,23 @@ const BrokerIntegrationCard = () => {
   };
 
   const handleDisconnect = async () => {
-    if (!window.confirm('Disconnect broker?')) return;
-    try {
-      await disconnectBroker('alpaca');
-      toast.success('Broker disconnected');
-      setConnected(false);
-      setApiKey('');
-      setApiSecret('');
-    } catch {
-      toast.error('Failed to disconnect broker');
-    }
+    setShowModal(true);
+  };
+
+  const confirmDisconnect = async () => {
+  try {
+    await disconnectBroker('alpaca');
+    toast.success('Broker disconnected');
+    setConnected(false);
+    setApiKey('');
+    setApiSecret('');
+    setShowModal(false);
+  } catch {
+    toast.error('Failed to disconnect broker');
+  }
+};
+  const handleCancel = () => {
+    setShowModal(false);
   };
 
   if (loadingBroker) {
@@ -71,52 +80,66 @@ const BrokerIntegrationCard = () => {
     );
   }
 
-  return connected ? (
-    <div className="broker-card-connected">
-      <div className="broker-header">
-        <h3>Alpaca</h3>
-        <span className="status-tag">Connected</span>
-      </div>
-      <div className="broker-actions">
-        <button onClick={handleDisconnect} disabled={disconnectingBroker}>
-          {disconnectingBroker ? 'Disconnecting...' : 'Disconnect'}
-        </button>
-      </div>
-    </div>
-  ) : (
-    <form className="settings-form broker-form">
-      <h2>Broker Integration</h2>
+  return (
+    <>
+      {connected ? (
+        <div className="broker-card-connected">
+          <div className="broker-header">
+            <h3>Alpaca</h3>
+            <span className="status-tag">Connected</span>
+          </div>
+          <div className="broker-actions">
+            <button onClick={handleDisconnect} disabled={disconnectingBroker}>
+              {disconnectingBroker ? 'Disconnecting...' : 'Disconnect'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <form className="settings-form broker-form">
+          <h2>Broker Integration</h2>
 
-      <label>API Key</label>
-      <input
-        type="text"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-        disabled={updatingBroker || disconnectingBroker}
+          <label>API Key</label>
+          <input
+            type="text"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            disabled={updatingBroker || disconnectingBroker}
+          />
+
+          <label>API Secret</label>
+          <input
+            type="password"
+            value={apiSecret}
+            onChange={(e) => setApiSecret(e.target.value)}
+            disabled={updatingBroker || disconnectingBroker}
+          />
+
+          <label>Base URL</label>
+          <input
+            type="text"
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
+            disabled={updatingBroker || disconnectingBroker}
+          />
+
+          <div className="button-group">
+            <button onClick={handleConnect} disabled={updatingBroker}>
+              {updatingBroker ? 'Connecting...' : 'Connect'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      <ConfirmModal
+        isOpen={showModal}
+        title="Disconnect Broker"
+        message="Are you sure you want to disconnect Alpaca broker?"
+        confirmText="Yes, Disconnect"
+        cancelText="Cancel"
+        onConfirm={confirmDisconnect}
+        onCancel={handleCancel}
       />
-
-      <label>API Secret</label>
-      <input
-        type="password"
-        value={apiSecret}
-        onChange={(e) => setApiSecret(e.target.value)}
-        disabled={updatingBroker || disconnectingBroker}
-      />
-
-      <label>Base URL</label>
-      <input
-        type="text"
-        value={baseUrl}
-        onChange={(e) => setBaseUrl(e.target.value)}
-        disabled={updatingBroker || disconnectingBroker}
-      />
-
-      <div className="button-group">
-        <button onClick={handleConnect} disabled={updatingBroker}>
-          {updatingBroker ? 'Connecting...' : 'Connect'}
-        </button>
-      </div>
-    </form>
+    </>
   );
 };
 

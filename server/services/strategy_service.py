@@ -6,6 +6,20 @@ from services.ai_service import predict_signals
 
 class StrategyService:
     @staticmethod
+    def compare(series, operator: str, value: float):
+        if operator == "<":
+            return series < value
+        elif operator == "<=":
+            return series <= value
+        elif operator == "==":
+            return series == value
+        elif operator == ">=":
+            return series >= value
+        elif operator == ">":
+            return series > value
+        else:
+            raise ValueError(f"Unsupported operator: {operator}")
+    @staticmethod
     def apply_moving_average_strategy(data: pd.DataFrame, short_window=10, long_window=50):
         if data is None or data.empty:
             return pd.DataFrame()
@@ -37,54 +51,60 @@ class StrategyService:
 
     @staticmethod
     def apply_saved_strategy(data: pd.DataFrame, strategy_id: int, db: Session = None):
-        """ Применяет сохраненную стратегию к данным """
         if data is None or data.empty:
             return pd.DataFrame()
 
         if db is None:
-            from database import get_db  # Импорт только если db не передан
-            db = next(get_db())  
+            from database import get_db
+            db = next(get_db())
 
         strategy = db.query(Strategy).filter(Strategy.id == strategy_id).first()
         if not strategy:
-            return data  # Если стратегии нет, просто возвращаем данные
+            return data
 
-        # Проверяем, какие индикаторы используются в стратегии
-        needs_sma = any(sig['indicator'] == "SMA" for sig in strategy.buy_signals + strategy.sell_signals)
-        needs_rsi = any(sig['indicator'] == "RSI" for sig in strategy.buy_signals + strategy.sell_signals)
+        all_signals = strategy.buy_signals + strategy.sell_signals
 
-        # Рассчитываем SMA, если он нужен
-        if needs_sma:
-            data['SMA_Short'] = data['Close'].rolling(window=10, min_periods=1).mean()
-            data['SMA_Long'] = data['Close'].rolling(window=50, min_periods=1).mean()
+        # Определяем нужные индикаторы
+        indicators = {s["indicator"] for s in all_signals}
 
-        # Рассчитываем RSI, если он нужен
-        if needs_rsi:
-            data['RSI'] = StrategyService.calculate_rsi(data)
+        if "SMA" in indicators:
+            data["SMA_Short"] = data["Close"].rolling(window=10, min_periods=1).mean()
+            data["SMA_Long"] = data["Close"].rolling(window=50, min_periods=1).mean()
 
-        # Применяем buy_signals
-        data['Buy_Signal'] = False
-        for signal in strategy.buy_signals:
-            indicator = signal['indicator']
-            value = float(signal['value'])
-            
-            if indicator == "RSI" and needs_rsi:
-                data.loc[data['RSI'] < value, 'Buy_Signal'] = True
-            
-            elif indicator == "SMA" and needs_sma:
-                data.loc[data['SMA_Short'] > data['SMA_Long'], 'Buy_Signal'] = True
+        if "RSI" in indicators:
+            data["RSI"] = StrategyService.calculate_rsi(data)
 
-        # Применяем sell_signals
-        data['Sell_Signal'] = False
-        for signal in strategy.sell_signals:
-            indicator = signal['indicator']
-            value = float(signal['value'])
+        if "MACD" in indicators:
+            macd, macd_signal = StrategyService.calculate_macd(data)
+            data["MACD"] = macd
+            data["MACD_SIGNAL"] = macd_signal
 
-            if indicator == "RSI" and needs_rsi:
-                data.loc[data['RSI'] > value, 'Sell_Signal'] = True
+        if "Bollinger Bands" in indicators:
+            upper, lower = StrategyService.calculate_bollinger_bands(data)
+            data["BB_UPPER"] = upper
+            data["BB_LOWER"] = lower
 
-            elif indicator == "SMA" and needs_sma:
-                data.loc[data['SMA_Short'] < data['SMA_Long'], 'Sell_Signal'] = True
+        def process_signals(signal_list, column_name):
+            data[column_name] = False
+            for signal in signal_list:
+                ind = signal["indicator"]
+                val = float(signal["value"])
+                op = signal.get("operator", ">")
+
+                if ind == "RSI" and "RSI" in data:
+                    data[column_name] |= StrategyService.compare(data["RSI"], op, val)
+
+                elif ind == "SMA" and "SMA_Short" in data and "SMA_Long" in data:
+                    data[column_name] |= StrategyService.compare(data["SMA_Short"] - data["SMA_Long"], op, 0)
+
+                elif ind == "MACD" and "MACD" in data and "MACD_SIGNAL" in data:
+                    data[column_name] |= StrategyService.compare(data["MACD"] - data["MACD_SIGNAL"], op, val)
+
+                elif ind == "Bollinger Bands" and "BB_UPPER" in data and "BB_LOWER" in data:
+                    data[column_name] |= StrategyService.compare(data["Close"], op, val)
+
+        process_signals(strategy.buy_signals, "Buy_Signal")
+        process_signals(strategy.sell_signals, "Sell_Signal")
 
         return data
     @staticmethod
@@ -124,3 +144,21 @@ class StrategyService:
         rsi = 100 - (100 / (1 + rs))
 
         return rsi
+    
+    @staticmethod
+    def calculate_macd(data, fast=12, slow=26, signal=9):
+        """Вычисляет MACD и сигнальную линию"""
+        ema_fast = data['Close'].ewm(span=fast, adjust=False).mean()
+        ema_slow = data['Close'].ewm(span=slow, adjust=False).mean()
+        macd = ema_fast - ema_slow
+        macd_signal = macd.ewm(span=signal, adjust=False).mean()
+        return macd, macd_signal
+
+    @staticmethod
+    def calculate_bollinger_bands(data, window=20, num_std=2):
+        """Вычисляет полосы Боллинджера"""
+        rolling_mean = data['Close'].rolling(window=window).mean()
+        rolling_std = data['Close'].rolling(window=window).std()
+        upper_band = rolling_mean + (rolling_std * num_std)
+        lower_band = rolling_mean - (rolling_std * num_std)
+        return upper_band, lower_band

@@ -8,6 +8,22 @@ import pandas as pd
 from utils.strategy_evaluator import eval_expr
 import numpy as np
 
+def build_expr(signals):
+        expressions = []
+        for s in signals:
+            raw_indicator = s.get('indicator')
+            operator = s.get('operator', '>')
+            value = s.get('value')
+
+            if not raw_indicator or value is None:
+                continue
+
+            # 🩹 Временная подмена Bollinger Bands → BB_lower
+            indicator = "BB_lower" if raw_indicator == "Bollinger Bands" else raw_indicator
+
+            expressions.append(f"{indicator} {operator} {value}")
+        return " and ".join(expressions)
+
 
 def run_backtest(request: BacktestRequest, user_id: int, db: Session):
     strategy = db.query(Strategy).filter_by(id=request.strategy_id, user_id=user_id).first()
@@ -59,10 +75,28 @@ def simulate_strategy(strategy: Strategy, df: pd.DataFrame):
         down = -delta.clip(upper=0).rolling(14).mean()
         rs = up / down
         df["RSI"] = 100 - (100 / (1 + rs))
+    if "MACD" in needed_cols:
+        exp1 = df["Close"].ewm(span=12, adjust=False).mean()
+        exp2 = df["Close"].ewm(span=26, adjust=False).mean()
+        df["MACD"] = exp1 - exp2
+    if "Bollinger Bands" in needed_cols or "BB_upper" in needed_cols or "BB_lower" in needed_cols:
+        sma = df["Close"].rolling(window=20).mean()
+        std = df["Close"].rolling(window=20).std()
+        df["BB_upper"] = sma + 2 * std
+        df["BB_lower"] = sma - 2 * std
 
-    # Формируем выражения
-    buy_expr = " and ".join([f"{s['indicator']} {s['operator']} {s['value']}" for s in strategy.buy_signals])
-    sell_expr = " and ".join([f"{s['indicator']} {s['operator']} {s['value']}" for s in strategy.sell_signals])
+    # 🔍 Логируем входные сигналы
+    print("📊 Buy signals:", strategy.buy_signals)
+    print("📊 Sell signals:", strategy.sell_signals)
+
+    
+
+    buy_expr = build_expr(strategy.buy_signals)
+    sell_expr = build_expr(strategy.sell_signals)
+
+
+    print("🧠 buy_expr:", buy_expr)
+    print("🧠 sell_expr:", sell_expr)
 
     df["Buy"] = eval_expr(buy_expr, df) if buy_expr else False
     df["Sell"] = eval_expr(sell_expr, df) if sell_expr else False

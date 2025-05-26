@@ -43,9 +43,6 @@ def fetch_intraday_alpaca(
 
     print("🔗 Alpaca Params:", params)
 
-    print("🔑 KEY:", ALPACA_API_KEY)
-    print("🔑 SECRET:", ALPACA_SECRET_KEY)
-
     response = requests.get(ALPACA_BASE_URL, headers=headers, params=params)
     response.raise_for_status()
     json_data = response.json()
