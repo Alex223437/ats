@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Dict, Optional, List
 from datetime import datetime
 
@@ -28,15 +28,7 @@ class BacktestTrade(BaseModel):
     time: datetime
 
 class BacktestResponse(BaseModel):
-    id: int
+    id: Optional[int] = None  # ⚠️ Убрали обязательность
     metrics: BacktestMetrics
     equity_curve: List[EquityPoint]
     trades: List[BacktestTrade]
-
-class BacktestResultInDB(BacktestResponse):
-    strategy_id: int
-    ticker: str
-    start_date: datetime
-    end_date: datetime
-    parameters: Optional[Dict]
-    created_at: datetime

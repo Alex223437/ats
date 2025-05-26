@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from models import Strategy
 from schemas import BacktestRequest
 from sqlalchemy.orm import Session
-from models.backtest_result import BacktestResult
 from data.alpaca_data import fetch_history_alpaca
 import pandas as pd
 from utils.strategy_evaluator import eval_expr
@@ -42,28 +41,17 @@ def run_backtest(request: BacktestRequest, user_id: int, db: Session):
 
     metrics = simulate_strategy(strategy, df)
 
-    result = BacktestResult(
-        user_id=user_id,
-        strategy_id=request.strategy_id,
-        parameters=request.parameters,
-        ticker=request.ticker,
-        start_date=request.start_date,
-        end_date=request.end_date,
-        metrics={key: metrics[key] for key in ["total_pnl", "win_rate", "trades", "sharpe_ratio", "max_drawdown", "average_pnl"]},
-        equity_curve=metrics["equity_curve"],
-        trades=metrics["trades"]
-    )
-    db.add(result)
-    db.commit()
-    db.refresh(result)
-    return result
+    return {
+        "metrics": {key: metrics[key] for key in ["total_pnl", "win_rate", "trades", "sharpe_ratio", "max_drawdown", "average_pnl"]},
+        "equity_curve": metrics["equity_curve"],
+        "trades": metrics["trades"]
+    }
 
 
 def simulate_strategy(strategy: Strategy, df: pd.DataFrame):
     df = df.copy()
     df = df.rename(columns={"close": "Close", "volume": "Volume"})
 
-        # Подготовка индикаторов, если они встречаются в выражениях
     needed_cols = [s["indicator"] for s in strategy.buy_signals + strategy.sell_signals]
     if "EMA_10" in needed_cols:
         df["EMA_10"] = df["Close"].ewm(span=10).mean()
@@ -85,15 +73,11 @@ def simulate_strategy(strategy: Strategy, df: pd.DataFrame):
         df["BB_upper"] = sma + 2 * std
         df["BB_lower"] = sma - 2 * std
 
-    # 🔍 Логируем входные сигналы
     print("📊 Buy signals:", strategy.buy_signals)
     print("📊 Sell signals:", strategy.sell_signals)
 
-    
-
     buy_expr = build_expr(strategy.buy_signals)
     sell_expr = build_expr(strategy.sell_signals)
-
 
     print("🧠 buy_expr:", buy_expr)
     print("🧠 sell_expr:", sell_expr)
@@ -101,24 +85,82 @@ def simulate_strategy(strategy: Strategy, df: pd.DataFrame):
     df["Buy"] = eval_expr(buy_expr, df) if buy_expr else False
     df["Sell"] = eval_expr(sell_expr, df) if sell_expr else False
 
-    position = 0
+    position = None  # None, 'long', or 'short'
     entry_price = 0
     trades_log = []
     pnl = 0
     trade_pnls = []
 
     for index, row in df.iterrows():
-        if row["Buy"] and position == 0:
-            position = 1
-            entry_price = row["Close"]
+        current_price = row["Close"]
+
+        # === Stop Loss / Take Profit for open position ===
+        if position in ('long', 'short'):
+            sl_triggered = False
+            tp_triggered = False
+
+            if strategy.stop_loss:
+                if strategy.sl_tp_is_percent:
+                    sl_threshold = entry_price * (1 - strategy.stop_loss / 100) if position == 'long' else entry_price * (1 + strategy.stop_loss / 100)
+                else:
+                    sl_threshold = entry_price - strategy.stop_loss if position == 'long' else entry_price + strategy.stop_loss
+                sl_triggered = current_price <= sl_threshold if position == 'long' else current_price >= sl_threshold
+
+            if strategy.take_profit:
+                if strategy.sl_tp_is_percent:
+                    tp_threshold = entry_price * (1 + strategy.take_profit / 100) if position == 'long' else entry_price * (1 - strategy.take_profit / 100)
+                else:
+                    tp_threshold = entry_price + strategy.take_profit if position == 'long' else entry_price - strategy.take_profit
+                tp_triggered = current_price >= tp_threshold if position == 'long' else current_price <= tp_threshold
+
+            if sl_triggered or tp_triggered:
+                exit_price = current_price
+                trade_pnl = exit_price - entry_price if position == 'long' else entry_price - exit_price
+                trades_log.append({
+                    "action": "exit",
+                    "price": round(exit_price, 2),
+                    "result": "stop_loss" if sl_triggered else "take_profit",
+                    "pnl": round(trade_pnl, 2),
+                    "time": index
+                })
+                pnl += trade_pnl
+                trade_pnls.append(trade_pnl)
+                position = None
+                continue
+
+        # === Open Long ===
+        if row["Buy"] and position is None:
+            position = 'long'
+            entry_price = current_price
             trades_log.append({"action": "buy", "price": round(entry_price, 2), "result": "opened", "pnl": 0, "time": index})
-        elif row["Sell"] and position == 1:
-            position = 0
-            exit_price = row["Close"]
+            continue
+
+        # === Open Short ===
+        if row["Sell"] and position is None:
+            position = 'short'
+            entry_price = current_price
+            trades_log.append({"action": "sell", "price": round(entry_price, 2), "result": "opened", "pnl": 0, "time": index})
+            continue
+
+        # === Close Long ===
+        if row["Sell"] and position == 'long':
+            position = None
+            exit_price = current_price
             trade_pnl = exit_price - entry_price
             trades_log.append({"action": "sell", "price": round(exit_price, 2), "result": "closed", "pnl": round(trade_pnl, 2), "time": index})
             pnl += trade_pnl
             trade_pnls.append(trade_pnl)
+            continue
+
+        # === Close Short ===
+        if row["Buy"] and position == 'short':
+            position = None
+            exit_price = current_price
+            trade_pnl = entry_price - exit_price
+            trades_log.append({"action": "buy", "price": round(exit_price, 2), "result": "closed", "pnl": round(trade_pnl, 2), "time": index})
+            pnl += trade_pnl
+            trade_pnls.append(trade_pnl)
+            continue
 
     df["Equity"] = df["Close"].pct_change().fillna(0)
     df["Strategy"] = df["Equity"] * df["Buy"].astype(int)

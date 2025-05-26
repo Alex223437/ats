@@ -9,6 +9,8 @@ class Strategy(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     title = Column(String, nullable=False)
 
+    strategy_type = Column(String, default="custom")  # custom | ml_rf | ml_tf
+
     buy_signals = Column(JSON, nullable=False, default={})
     sell_signals = Column(JSON, nullable=False, default={})
     signal_logic = Column(String, default="AND")
@@ -16,7 +18,7 @@ class Strategy(Base):
 
     order_type = Column(String, default="market")              # market / limit / stop ...
     use_notional = Column(Boolean, default=False)              # true → $ (notional), false → qty
-    trade_amount = Column(Float, default=1.0)                # количество или сумма
+    trade_amount = Column(Float, default=1.0)                  # количество или сумма
 
     use_balance_percent = Column(Boolean, default=False)       # использовать % от кэша
 
@@ -37,4 +39,3 @@ class Strategy(Base):
     user = relationship("User", back_populates="strategies")
     signals = relationship("SignalLog", back_populates="strategy", cascade="all, delete-orphan")
     tickers = relationship("StrategyTicker", cascade="all, delete-orphan")
-    backtest_results = relationship("BacktestResult", back_populates="strategy", cascade="all, delete-orphan")

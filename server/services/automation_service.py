@@ -89,6 +89,30 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
     if last_signal and get_debug_hash(last_signal.debug_data) == signal_hash:
         print(f"🛑 Duplicate signal for {ticker} skipped.")
         return
+    
+    positions = get_positions(broker)
+    existing_position = next((p for p in positions if p["symbol"] == ticker), None)
+
+    if existing_position:
+        position_qty = float(existing_position["qty"])
+        position_side = "buy" if position_qty > 0 else "sell"
+
+        if action == position_side or action is None:
+            print(f"⏸ HOLD: Already holding {position_side} on {ticker}, skipping same direction")
+
+            hold_signal = SignalLog(
+                user_id=user.id,
+                strategy_id=strategy.id,
+                ticker=ticker,
+                action="hold",
+                price=price,
+                debug_data=debug_data,
+                executed=True,
+                result="ignored: same direction"
+            )
+            db.add(hold_signal)
+            db.commit()
+            return
 
     new_signal = SignalLog(
         user_id=user.id,
