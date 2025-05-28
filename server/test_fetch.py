@@ -6,13 +6,11 @@ start = datetime(2025, 4, 1)
 end = datetime(2025, 4, 20)
 
 # Считаем интервал в минутах
-minutes_back = int((end - start).total_seconds() // 60)
 
 # Вызываем Alpaca
 df = fetch_intraday_alpaca(
     symbol="AAPL",
     timeframe="1Hour",
-    minutes_back=minutes_back
 )
 
 # Выводим результат

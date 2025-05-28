@@ -16,4 +16,6 @@ scikit-learn
 matplotlib
 alpaca-trade-api
 apscheduler
-tensorflow==2.15.0
+tensorflow==2.19.0
+ta 
+imbalanced-learn

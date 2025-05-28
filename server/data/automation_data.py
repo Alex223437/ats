@@ -14,16 +14,14 @@ ALPACA_BASE_URL = "https://data.alpaca.markets/v2/stocks/bars"
 def fetch_intraday_alpaca(
     symbol: str,
     timeframe: str = "5Min",
-    minutes_back: int = 60
+    start_date: datetime = None,
+    end_date: datetime = None
 ) -> pd.DataFrame:
     """
-    Fetches intraday stock data from Alpaca using IEX feed.
-    :param symbol: e.g. "AAPL"
-    :param timeframe: e.g. "1Min", "5Min"
-    :param minutes_back: how many minutes back from now to load
+    Загружает бары с Alpaca между start_date и end_date.
     """
-    end = datetime.utcnow()
-    start = end - timedelta(minutes=minutes_back)
+    end = end_date or datetime.utcnow()
+    start = start_date or (end - timedelta(days=7))  # По умолчанию за 7 дней
 
     headers = {
         "APCA-API-KEY-ID": ALPACA_API_KEY,
@@ -35,7 +33,7 @@ def fetch_intraday_alpaca(
         "timeframe": timeframe,
         "start": start.isoformat() + "Z",
         "end": end.isoformat() + "Z",
-        "limit": 1000,
+        "limit": 10000,  # максимум
         "feed": "iex",
         "adjustment": "raw",
         "sort": "asc"

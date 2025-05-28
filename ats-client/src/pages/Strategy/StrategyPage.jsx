@@ -4,6 +4,7 @@ import StrategySidebar from '../../components/AsideComponent/AsideStrategy';
 import ManageStrategies from '../../components/StrategyComponent/ManageStrategies';
 import ActiveStrategies from '../../components/StrategyComponent/ActiveStrategies';
 import StrategyLogModal from '../../components/StrategyComponent/StrategyLogModal';
+import TensorFlowStrategyForm from '../../components/StrategyComponent/TensorFlowForm';
 import useStrategyApi from '@/hooks/useStrategyApi';
 import useStrategyLogs from '../../hooks/useStrategyLogs';
 import { toast } from 'react-hot-toast';
@@ -26,6 +27,9 @@ const StrategyPage = () => {
     loading,
     strategies,
     refreshStrategies,
+    trainStrategyModel,
+    deleteTrainedModel,
+    fetchModelInfo
   } = useStrategyApi();
 
   const { fetchStrategyLogs } = useStrategyLogs();
@@ -91,6 +95,28 @@ const StrategyPage = () => {
     setLogsModal({ open: true, logs, title: strategy?.title || '' });
   };
 
+  const handleTrainClick = async () => {
+    try {
+      await trainStrategyModel(selectedStrategy.id);
+      await refreshStrategies();
+      toast.success('Model trained successfully!');
+    } catch (err) {
+      toast.error('Training failed');
+    }
+  };
+
+  const handleDeleteModel = async () => {
+    try {
+      await deleteTrainedModel(selectedStrategy.id);
+      await refreshStrategies();
+      toast.success('Model deleted successfully!');
+    } catch (err) {
+      toast.error('Failed to delete model');
+    }
+  };
+
+  console.log('Selected Strategy:', selectedStrategy);
+
   return (
     <>
       <StrategySidebar
@@ -101,12 +127,23 @@ const StrategyPage = () => {
         loading={loading.fetch}
       />
       <div className="strategy-grid">
-        <StrategyForm
-          strategy={selectedStrategy}
-          onSave={handleSave}
-          onDelete={handleDelete}
-          loading={loading.create || loading.update || loading.fetch}
-        />
+        {selectedStrategy?.strategy_type === 'ml_tf' ? (
+          <TensorFlowStrategyForm
+            strategy={selectedStrategy}
+            onSave={handleSave}
+            onDelete={handleDelete}
+            loading={loading.create || loading.update || loading.fetch}
+            onTrain={handleTrainClick}
+            onDeleteModel={handleDeleteModel}
+          />
+        ) : (
+          <StrategyForm
+            strategy={selectedStrategy}
+            onSave={handleSave}
+            onDelete={handleDelete}
+            loading={loading.create || loading.update || loading.fetch}
+          />
+        )}
         <ManageStrategies
           strategies={strategies}
           onStart={handleStart}

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey, JSON, Boolean, Float
+from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey, JSON, Boolean, Float, Date
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -35,6 +35,11 @@ class Strategy(Base):
 
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+
+    training_ticker = Column(String, nullable=True)
+    training_from_date = Column(Date, nullable=True)
+    training_to_date = Column(Date, nullable=True)
+    last_trained_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="strategies")
     signals = relationship("SignalLog", back_populates="strategy", cascade="all, delete-orphan")

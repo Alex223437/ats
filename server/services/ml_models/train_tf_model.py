@@ -15,6 +15,12 @@ from data.data_preprocessing import create_labels, prepare_features_for_ml
 MODEL_PATH = "services/ml_models/models/tf_model.keras"
 SCALER_PATH = "services/ml_models/models/tf_scaler.pkl"
 
+FEATURE_COLUMNS = [
+    'Close', 'Volume', 'Volatility', 'Daily_Return',
+    'SMA_5', 'SMA_20', 'SMA_10', 'SMA_50',
+    'EMA_10', 'EMA_50', 'RSI_14', 'MACD', 'MACD_Signal'
+]
+
 def build_mlp_model(input_dim):
     model = keras.Sequential([
         layers.Input(shape=(input_dim,)),
@@ -42,8 +48,8 @@ def preprocess_data_for_tf(df: pd.DataFrame):
             return 0
 
     df["Target"] = df.apply(label, axis=1)
-    X = df.drop(columns=["Buy_Signal", "Sell_Signal", "Target"])
-    X = X.select_dtypes(include=["number"])
+    df = df.drop(columns=["Buy_Signal", "Sell_Signal"])
+    X = df[FEATURE_COLUMNS].copy()
     y = df["Target"].astype(int)
 
     return X, y
@@ -58,6 +64,8 @@ def train_tf_model():
             print(f"⚠️ Пропущено: {ticker}, нет данных")
             continue
         data = MarketData.calculate_indicators(data)
+        data["SMA_5"] = data["Close"].rolling(window=5).mean()
+        data["SMA_20"] = data["Close"].rolling(window=20).mean()
         data = create_labels(data)
         data["Ticker"] = ticker
         all_data.append(data)
@@ -67,6 +75,7 @@ def train_tf_model():
 
     df = pd.concat(all_data).reset_index()
     X, y = preprocess_data_for_tf(df)
+    print(f"📦 Training X cols: {X.columns.tolist()}")
 
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)

@@ -13,6 +13,7 @@ from models.user_preferences import UserPreferences
 from sqlalchemy.orm import Session
 import hashlib
 import json
+from services.tf_strategy_service import run_tf_strategy_for_ticker
 
 def get_debug_hash(data: dict) -> str:
     return hashlib.md5(json.dumps(data, sort_keys=True).encode()).hexdigest()
@@ -47,6 +48,8 @@ def get_tp_sl_prices(price, action, strategy):
 
     return tp, sl
 
+
+
 def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
     print(f"▶️ Strategy '{strategy.title}' checking {ticker}...")
 
@@ -57,7 +60,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
 
 
     # df = fetch_history_alpaca(symbol=ticker, start=start, end=end, timeframe=strategy.default_timeframe)
-    df = fetch_intraday_alpaca(symbol=ticker, timeframe=strategy.default_timeframe, minutes_back=240)
+    df = fetch_intraday_alpaca(symbol=ticker, timeframe=strategy.default_timeframe)
     if df is None or df.empty:
         print(f"⚠️ No data for {ticker}")
         return
@@ -142,7 +145,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
     else:
         amount = strategy.trade_amount
 
-    qty = round(amount / price, 2)
+    qty = amount
     notional = amount if strategy.use_notional else None
     if strategy.use_notional:
         qty = None
@@ -270,7 +273,11 @@ def check_and_run_strategies():
             user = strategy.user
             for link in strategy.tickers:
                 ticker = link.user_stock.ticker
-                run_strategy_for_ticker(strategy, ticker, user, db)
+
+                if strategy.strategy_type == "ml_tf":
+                    run_tf_strategy_for_ticker(strategy, ticker, user, db)
+                else:
+                    run_strategy_for_ticker(strategy, ticker, user, db)
 
             strategy.last_checked = now
             db.commit()

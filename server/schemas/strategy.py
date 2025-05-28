@@ -1,16 +1,16 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Union
 from datetime import datetime
-from pydantic import model_validator
+from pydantic import model_validator, ConfigDict
 
 class Signal(BaseModel):
     indicator: str
     value: float
     operator: Optional[Literal["<", "<=", "==", ">=", ">"]] = ">"  # по умолчанию >
 
-class StrategyBase(BaseModel):
+class CustomStrategyBase(BaseModel):
+    strategy_type: Literal["custom"] = "custom"
     title: str
-    strategy_type: Literal["custom", "ml_rf", "ml_tf"] = "custom"
     buy_signals: List[Signal]
     sell_signals: List[Signal]
     market_check_frequency: str
@@ -26,20 +26,27 @@ class StrategyBase(BaseModel):
     sl_tp_is_percent: bool
     default_timeframe: Literal["1Min", "5Min", "1H", "1D"]
 
+class TensorFlowStrategyBase(BaseModel):
+    strategy_type: Literal["ml_tf"] = "ml_tf"
+    title: str
+    training_ticker: str
+    training_from_date: str
+    training_to_date: str
+
+StrategyBase = Union[CustomStrategyBase, TensorFlowStrategyBase]
+
 class TickerWithSignal(BaseModel):
     ticker: str
     last_signal: Optional[str] = None
     last_price: Optional[float] = None
     updated_at: Optional[datetime] = None
 
-class StrategyCreate(StrategyBase):
+class CustomStrategyCreate(CustomStrategyBase):
     @model_validator(mode="after")
     def validate_combinations(self):
-        # 🔒 Notional работает только с market
         if self.use_notional and self.order_type != "market":
             raise ValueError("Notional is only allowed with market orders.")
 
-        # ⚠️ SL/TP можно только при qty (не notional и не % баланса)
         uses_qty = not self.use_notional and not self.use_balance_percent
         has_sl_tp = (self.stop_loss is not None and self.stop_loss != 0) or (self.take_profit is not None and self.take_profit != 0)
 
@@ -48,14 +55,26 @@ class StrategyCreate(StrategyBase):
 
         return self
 
-class StrategyResponse(StrategyBase):
+StrategyCreate = Union[CustomStrategyCreate, TensorFlowStrategyBase]
+
+class CustomStrategyResponse(CustomStrategyBase):
     id: int
     is_enabled: bool
     tickers: List[str] = []
     last_checked: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+class TensorFlowStrategyResponse(TensorFlowStrategyBase):
+    id: int
+    is_enabled: bool
+    tickers: List[str] = []
+    last_checked: Optional[datetime] = None
+    last_trained_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+StrategyResponse = Union[CustomStrategyResponse, TensorFlowStrategyResponse]
 
 class StrategyTickerLink(BaseModel):
     tickers: List[str]

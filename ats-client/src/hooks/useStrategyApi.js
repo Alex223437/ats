@@ -13,6 +13,8 @@ export const useStrategyApi = () => {
   const enable = useApiRequest(); // ✅ новое
   const setTickers = useApiRequest();
   const fetchTickers = useApiRequest();
+  const train = useApiRequest();
+  const deleteModel = useApiRequest();
 
   const fetchStrategies = async () => {
     const data = await fetchAll.request({ method: 'get', url: '/strategies' });
@@ -76,8 +78,12 @@ export const useStrategyApi = () => {
         url: `/strategies/${strategyId}/tickers`,
         data: { tickers },
       }),
+    trainStrategyModel: (strategyId) =>
+      train.request({ method: 'post', url: `/strategies/${strategyId}/train` }),
     fetchStrategyTickers: (strategyId) =>
       fetchTickers.request({ method: 'get', url: `/strategies/${strategyId}/tickers` }),
+    deleteTrainedModel: (strategyId) =>
+      deleteModel.request({ method: 'delete', url: `/strategies/${strategyId}/model` }),
 
     strategies,
     loading: {
@@ -90,6 +96,7 @@ export const useStrategyApi = () => {
       enable: enable.loading, // ✅
       setTickers: setTickers.loading,
       fetchTickers: fetchTickers.loading,
+      train: train.loading,
     },
   };
 };
