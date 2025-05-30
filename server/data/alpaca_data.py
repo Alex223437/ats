@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 
-# загрузка .env переменных
 load_dotenv()
 
 ALPACA_API_KEY = os.getenv("ALPACA_API_KEY")
@@ -41,7 +40,7 @@ def fetch_history_alpaca(
     data = response.json()
 
     if symbol not in data.get("bars", {}):
-        print(f"⚠️ Нет данных по {symbol}")
+        print(f"No data for {symbol}")
         return pd.DataFrame()
 
     bars = data["bars"][symbol]
@@ -62,5 +61,5 @@ def fetch_history_alpaca(
     df["Date"] = pd.to_datetime(df["Date"])
     df.set_index("Date", inplace=True)
 
-    print(f"✅ Получено {len(df)} записей по {symbol} с Alpaca")
+    print(f"Получено {len(df)} записей по {symbol} с Alpaca")
     return df

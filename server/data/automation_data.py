@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
 load_dotenv()
 
 ALPACA_API_KEY = os.getenv("ALPACA_API_KEY")
@@ -18,10 +17,10 @@ def fetch_intraday_alpaca(
     end_date: datetime = None
 ) -> pd.DataFrame:
     """
-    Загружает бары с Alpaca между start_date и end_date.
+    Download intraday market data from Alpaca API.
     """
     end = end_date or datetime.utcnow()
-    start = start_date or (end - timedelta(days=7))  # По умолчанию за 7 дней
+    start = start_date or (end - timedelta(days=7)) 
 
     headers = {
         "APCA-API-KEY-ID": ALPACA_API_KEY,
@@ -33,20 +32,18 @@ def fetch_intraday_alpaca(
         "timeframe": timeframe,
         "start": start.isoformat() + "Z",
         "end": end.isoformat() + "Z",
-        "limit": 10000,  # максимум
+        "limit": 10000, 
         "feed": "iex",
         "adjustment": "raw",
         "sort": "asc"
     }
-
-    print("🔗 Alpaca Params:", params)
 
     response = requests.get(ALPACA_BASE_URL, headers=headers, params=params)
     response.raise_for_status()
     json_data = response.json()
 
     if symbol not in json_data.get("bars", {}):
-        print(f"⚠️ Нет данных по {symbol}")
+        print(f"No data for {symbol}")
         return pd.DataFrame()
 
     bars = json_data["bars"][symbol]
@@ -67,5 +64,5 @@ def fetch_intraday_alpaca(
     df["Date"] = pd.to_datetime(df["Date"])
     df.set_index("Date", inplace=True)
 
-    print(f"✅ Получено {len(df)} записей по {symbol} с Alpaca")
+    print(f"Recieved {len(df)} candles {symbol} from Alpaca")
     return df

@@ -57,9 +57,7 @@ const useDashboardApi = (selectedStock, stocks) => {
   }, [selectedStock]);
 
   useEffect(() => {
-    if (stocks.length > 0) {
-      fetchOverview({ method: 'get', url: '/stocks/overview' });
-    }
+    fetchOverview({ method: 'get', url: '/stocks/overview' });
   }, [stocks]);
 
   useEffect(() => {

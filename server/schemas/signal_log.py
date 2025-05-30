@@ -6,11 +6,11 @@ class SignalLogResponse(BaseModel):
     id: int
     strategy_id: int
     ticker: str
-    action: str                # раньше было signal — заменяем на action (buy/sell/hold)
+    action: str               
     price: float
     created_at: datetime
-    executed: bool             # был ли исполнен (перешёл в сделку)
-    result: Optional[str] = None  # matched / ignored / failed / null
+    executed: bool            
+    result: Optional[str] = None 
     debug_data: Optional[dict] = None
 
     class Config:

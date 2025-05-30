@@ -23,11 +23,11 @@ def clean_debug_data(data: dict):
     return {k: convert(v) for k, v in data.items()}
 
 def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
-    print(f"▶️ ML Strategy '{strategy.title}' checking {ticker}...")
+    print(f"ML Strategy '{strategy.title}' checking {ticker}...")
 
     broker = next((b for b in user.brokers if b.is_connected), None)
     if not broker:
-        print(f"❌ No connected broker for user {user.id}")
+        print(f"No connected broker for user {user.id}")
         return
     
     end = datetime.utcnow()
@@ -41,15 +41,14 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
         end_date=end
     )
     if df is None or df.empty:
-        print(f"⚠️ No data for {ticker}")
+        print(f"No data for {ticker}")
         return
 
     prediction = predict_signals(ticker, user.id, df)
     if prediction is None:
-        print(f"⚠️ No prediction for {ticker}")
+        print(f"No prediction for {ticker}")
         return
 
-    # 🔄 Получение открытых позиций
     positions = get_positions(broker)
     alpaca_pos = next((p for p in positions if p["symbol"] == ticker), None)
 
@@ -67,14 +66,25 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
     df_result = pd.DataFrame([prediction])
     decision = run_conservative_strategy(df_result, current_position=current_position)
     if not decision or decision["action"] == "hold":
-        print(f"⏸ HOLD: No action for {ticker}")
+        print(f"HOLD: No action for {ticker}")
+        debug_data = clean_debug_data(prediction)
+        signal_log = SignalLog(
+            user_id=user.id,
+            strategy_id=strategy.id,
+            ticker=ticker,
+            action="hold",
+            price=float(prediction.get("price", 0)),
+            debug_data=debug_data,
+            executed=True,
+            result="hold"
+        )
         return
 
     action = decision["action"]
     price = decision["price"]
     time = decision["time"]
 
-    # === Определение объёма
+
     qty = None
     notional = None
 
@@ -110,7 +120,7 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
             try:
                 send_signal_notification(user.email, ticker, direction, price)
             except Exception as e:
-                print(f"⚠️ Failed to send signal notification: {e}")
+                print(f"Failed to send signal notification: {e}")
 
         
 
@@ -145,7 +155,7 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
                 signal_log.result = "matched"
                 db.commit()
 
-                print(f"✅ Order placed: {ticker} at {price}")
+                print(f"Order placed: {ticker} at {price}")
 
                 if prefs and prefs.email_alerts_enabled and prefs.notify_on_order_filled:
                     send_order_filled_notification(user.email, ticker, price, notional or qty)
@@ -154,10 +164,9 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
                 trade.status = "rejected"
                 signal_log.result = f"failed: {str(e)}"
                 db.commit()
-                print(f"❌ Order failed: {e}")
+                print(f"Order failed: {e}")
 
     elif action == "close":
-      # Сначала ищем открытую позицию в базе
       last_open = (
           db.query(TradeLog)
           .filter(
@@ -171,20 +180,18 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
       )
 
       if last_open:
-          # Закрываем существующую запись
           last_open.exit_price = price
           last_open.exit_time = time
           last_open.pnl = (price - last_open.price) if last_open.action == "buy" else (last_open.price - price)
           db.commit()
-          print(f"✅ Closed tracked position in DB for {ticker} due to {decision.get('reason')}")
+          print(f"Closed tracked position in DB for {ticker} due to {decision.get('reason')}")
           prefs = db.query(UserPreferences).filter_by(user_id=user.id).first()
           if prefs and prefs.email_alerts_enabled and prefs.notify_on_order_filled:
               try:
                   send_order_filled_notification(user.email, ticker, price, qty)
               except Exception as e:
-                  print(f"⚠️ Failed to send order filled notification: {e}")
+                  print(f"Failed to send order filled notification: {e}")
       elif current_position:
-          # Нет записи в БД, но есть брокерская позиция — логируем как новую закрывающую сделку
           direction = current_position["type"]
           entry_price = current_position["entry_price"]
           pnl = (price - entry_price) if direction == "long" else (entry_price - price)
@@ -194,8 +201,8 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
               strategy_id=strategy.id,
               symbol=ticker,
               action="sell" if direction == "long" else "buy",
-              price=float(price),  # <-- тут
-              quantity=int(qty),   # или float(), зависит от логики
+              price=float(price), 
+              quantity=int(qty),   
               exit_price=float(price),
               exit_time=pd.Timestamp(time).to_pydatetime(),
               pnl=round(float(pnl), 4),
@@ -204,26 +211,26 @@ def run_tf_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Sessio
           )
           db.add(trade)
           db.commit()
-          print(f"✅ Closed broker-reported position on {ticker} due to {decision.get('reason')}")
+          print(f"Closed broker-reported position on {ticker} due to {decision.get('reason')}")
           prefs = db.query(UserPreferences).filter_by(user_id=user.id).first()
           if prefs and prefs.email_alerts_enabled and prefs.notify_on_order_filled:
               try:
                   send_order_filled_notification(user.email, ticker, price, qty)
               except Exception as e:
-                  print(f"⚠️ Failed to send order filled notification: {e}")
+                  print(f"Failed to send order filled notification: {e}")
       else:
-          print(f"❌ No position to close for {ticker} (neither in DB nor from broker)")
+          print(f"No position to close for {ticker} (neither in DB nor from broker)")
       if strategy.automation_mode == "FullAuto":
         try:
             order = place_order(
                 broker=broker,
                 symbol=ticker,
-                side="sell" if direction == "long" else "buy",  # Закрываем позицию
+                side="sell" if direction == "long" else "buy",  
                 order_type=strategy.order_type,
                 time_in_force="day",
                 qty=qty,
                 notional=notional
             )
-            print(f"✅ Close order placed: {ticker} at {price}")
+            print(f"Close order placed: {ticker} at {price}")
         except Exception as e:
-            print(f"❌ Failed to place close order: {e}")
+            print(f"Failed to place close order: {e}")

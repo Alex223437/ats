@@ -40,10 +40,8 @@ def predict_signals_batch(ticker: str, user_id: int, df: pd.DataFrame) -> pd.Dat
     original_closes = df["Close"].copy()
     timestamps = df.index.copy()
 
-    # Scale features
     df[feature_columns] = scaler.transform(df[feature_columns])
 
-    # Prepare sequences
     sequences = []
     meta = []
     for i in range(sequence_length, len(df)):
@@ -63,7 +61,6 @@ def predict_signals_batch(ticker: str, user_id: int, df: pd.DataFrame) -> pd.Dat
     confidences = np.max(predictions, axis=1)
     decoded_labels = encoder.inverse_transform(predicted_labels)
 
-    # Collect into DataFrame
     output = []
     for i in range(len(meta)):
         output.append({

@@ -9,7 +9,7 @@ class UserBroker(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    broker = Column(String, nullable=False)  # например 'alpaca'
+    broker = Column(String, nullable=False)
     api_key = Column(String, nullable=False)
     api_secret = Column(String, nullable=False)
     base_url = Column(String, nullable=True)

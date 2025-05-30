@@ -15,8 +15,8 @@ def place_order(
     qty: float = None,
     notional: float = None,
     side: str = "buy",
-    order_type: str = "market",  # ← это type
-    order_class: str = "",       # ← это order_class: "" or "bracket"
+    order_type: str = "market",  
+    order_class: str = "",       
     time_in_force: str = "day",
     limit_price: float = None,
     stop_price: float = None,
@@ -27,7 +27,6 @@ def place_order(
 ):
     api = get_api_client(broker)
 
-    # ✅ Валидация
     if notional and qty:
         raise ValueError("You cannot specify both 'qty' and 'notional'")
 
@@ -37,7 +36,6 @@ def place_order(
     if notional and (order_type != "market" or time_in_force != "day"):
         raise ValueError("Notional orders are only allowed with order_type='market' and time_in_force='day'")
 
-    # 📦 Аргументы запроса
     order_args = {
         "symbol": symbol,
         "side": side,
@@ -71,7 +69,7 @@ def place_order(
         if trail_percent is not None:
             order_args["trail_percent"] = round(trail_percent, 2)
 
-    print(f"📤 Alpaca Order Payload:\n{json.dumps(order_args, indent=2)}")
+    print(f"Alpaca Order Payload:\n{json.dumps(order_args, indent=2)}")
 
     try:
         return api.submit_order(**order_args)

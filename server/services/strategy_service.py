@@ -2,7 +2,6 @@ import pandas as pd
 from sqlalchemy.orm import Session
 from database import get_db
 from models.strategy import Strategy
-from services.ai_service import predict_signals  
 
 class StrategyService:
     @staticmethod
@@ -64,7 +63,6 @@ class StrategyService:
 
         all_signals = strategy.buy_signals + strategy.sell_signals
 
-        # Определяем нужные индикаторы
         indicators = {s["indicator"] for s in all_signals}
 
         if "SMA" in indicators:
@@ -107,32 +105,7 @@ class StrategyService:
         process_signals(strategy.sell_signals, "Sell_Signal")
 
         return data
-    @staticmethod
-    def apply_ai_prediction(data: pd.DataFrame):
-        """
-        Применяет AI модель для генерации сигналов покупок и продаж.
-        AI предсказывает точки входа и выхода на основе исторических данных.
-        """
-        if data is None or data.empty:
-            return pd.DataFrame()
-
-        if 'Date' not in data.columns:
-            if 'date' in data.columns:
-                data = data.rename(columns={'date': 'Date'})
-
-        if not isinstance(data.index, pd.DatetimeIndex):
-            data['Date'] = pd.to_datetime(data['Date'])
-            data = data.set_index('Date')
-
-        # Запускаем AI-предсказания
-        ai_predictions = predict_signals(data)
-
-        # Добавляем AI-сигналы в общий датасет
-        data['Buy_Signal'] = ai_predictions['Buy_Prediction'].astype(bool)
-        data['Sell_Signal'] = ai_predictions['Sell_Prediction'].astype(bool)
-
-        return data
-
+    
     @staticmethod
     def calculate_rsi(data, period=14):
         """ Рассчитывает RSI на основе цен закрытия """
@@ -140,14 +113,14 @@ class StrategyService:
         gain = (delta.where(delta > 0, 0)).rolling(window=period, min_periods=1).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=period, min_periods=1).mean()
 
-        rs = gain / (loss + 1e-10)  # Чтобы избежать деления на 0
+        rs = gain / (loss + 1e-10) 
         rsi = 100 - (100 / (1 + rs))
 
         return rsi
     
     @staticmethod
     def calculate_macd(data, fast=12, slow=26, signal=9):
-        """Вычисляет MACD и сигнальную линию"""
+        """Calculate MACD and MACD Signal Line"""
         ema_fast = data['Close'].ewm(span=fast, adjust=False).mean()
         ema_slow = data['Close'].ewm(span=slow, adjust=False).mean()
         macd = ema_fast - ema_slow
@@ -156,7 +129,7 @@ class StrategyService:
 
     @staticmethod
     def calculate_bollinger_bands(data, window=20, num_std=2):
-        """Вычисляет полосы Боллинджера"""
+        """Calculate Bollinger Bands"""
         rolling_mean = data['Close'].rolling(window=window).mean()
         rolling_std = data['Close'].rolling(window=window).std()
         upper_band = rolling_mean + (rolling_std * num_std)

@@ -80,7 +80,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.add_all(ml_strategies)
     db.commit()
 
-    return {"message": "✅ Registration successful", "user_id": new_user.id}
+    return {"message": "Registration successful", "user_id": new_user.id}
 
 
 @auth_router.post("/token")
@@ -88,7 +88,6 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    # Ищем либо по email, либо по username
     user = (
         db.query(User)
         .filter((User.email == form_data.username) | (User.username == form_data.username))
@@ -108,7 +107,7 @@ def login(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,  # В проде ставим True
+        secure=False,  
         samesite="Lax",
         max_age=60 * 60 * 24
     )
@@ -144,7 +143,7 @@ def refresh_token(
             key="access_token",
             value=new_token,
             httponly=True,
-            secure=False,  # True в проде!
+            secure=False,  
             samesite="Lax",
             max_age=60 * 60 * 24
         )

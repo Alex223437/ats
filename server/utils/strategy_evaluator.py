@@ -8,7 +8,6 @@ def eval_expr(expr: str, df: pd.DataFrame) -> pd.Series:
     Automatically converts 'and', 'or', 'not' into bitwise ops and adds parentheses to avoid precedence issues.
     """
 
-    # Простейшее парсирование — на каждое сравнение добавим скобки
     expr = re.sub(r'([a-zA-Z0-9_]+ *[<>=!]=? *[^&|() ]+)', r'(\1)', expr)
     expr = expr.replace(" and ", " & ").replace(" or ", " | ").replace(" not ", " ~ ")
 
@@ -21,6 +20,6 @@ def eval_expr(expr: str, df: pd.DataFrame) -> pd.Series:
             return result.fillna(False)
         return pd.Series([False] * len(df))
     except Exception as e:
-        print(f"❌ Ошибка в eval_expr: {e}")
-        print(f"🔍 Выражение: {expr}")
+        print(f"Error in eval_expr: {e}")
+        print(f"Error: {expr}")
         return pd.Series([False] * len(df))

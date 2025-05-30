@@ -22,7 +22,7 @@ def run_backtest(request: BacktestRequest, user_id: int, db: Session):
     )
 
     if df is None or df.empty:
-        raise ValueError("Исторические данные не загружены?")
+        raise ValueError("Historical data is empty or not available for the specified ticker and date range")
 
     if strategy.strategy_type == "ml_tf":
         trades_log, equity_curve, position, entry_price = simulate_ai_strategy(

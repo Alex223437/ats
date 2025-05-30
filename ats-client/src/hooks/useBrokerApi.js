@@ -7,7 +7,7 @@ export const useBrokerApi = () => {
 
   const updateBroker = async (params) => {
     return await update.request({
-      method: 'POST', // заменили PUT на POST (новый эндпоинт /user/brokers)
+      method: 'POST',
       url: '/user/brokers',
       data: params,
     });

@@ -9,7 +9,7 @@ load_dotenv()
 
 POLYGON_API_KEY = os.getenv("POLYGON_API_KEY")
 
-_data_cache = {}  # Простое in-memory кэш-хранилище
+_data_cache = {}  
 
 def _cache_key(ticker, from_date, to_date):
     return f"{ticker}_{from_date}_{to_date}"
@@ -17,9 +17,8 @@ def _cache_key(ticker, from_date, to_date):
 class MarketData:
     @staticmethod
     def download_data(ticker: str, multiplier=1, timespan='hour', from_date=None, to_date=None, use_api=False, force_reload=False):
-        """Загрузка часовых исторических данных через Polygon.io + расчёт индикаторов"""
+        """Download market data from Polygon.io API and calculate indicators."""
 
-        # 🗓 Авто-период: последние 90 дней
         if to_date is None:
             to_date = str(datetime.today().date())
         if from_date is None:
@@ -27,14 +26,14 @@ class MarketData:
 
         key = _cache_key(ticker, from_date, to_date)
         if not force_reload and key in _data_cache:
-            print(f"🧠 Кэш: {ticker} ({from_date} → {to_date})")
+            print(f"Cache: {ticker} ({from_date} → {to_date})")
             return _data_cache[key]
 
-        print(f"🌐 Polygon: {ticker} ({from_date} → {to_date})")
+        print(f"Polygon: {ticker} ({from_date} → {to_date})")
         url = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/{multiplier}/{timespan}/{from_date}/{to_date}"
         params = {
             "apiKey": POLYGON_API_KEY,
-            "limit": 50000,  # ⛽ побольше лимит для H1
+            "limit": 50000,
             "adjustment": "raw",
             "sort": "asc"
         }
@@ -45,7 +44,7 @@ class MarketData:
             data = response.json()
 
             if "results" not in data or not data["results"]:
-                raise ValueError("Нет данных или неверный API-ключ.")
+                raise ValueError("No data found for the specified ticker and date range.")
 
             df = pd.DataFrame(data["results"]).rename(columns={
                 't': 'Date',
@@ -62,11 +61,11 @@ class MarketData:
             df = MarketData.fetch_indicators_from_api(df, ticker) if use_api else MarketData.calculate_indicators(df)
 
             _data_cache[key] = df
-            print(f"✅ Успешно: {ticker}")
+            print(f"Success: {ticker}")
             return df
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ Polygon Error: {e}")
+            print(f"Polygon Error: {e}")
             return None
 
     @staticmethod
@@ -84,7 +83,7 @@ class MarketData:
                     df[indicator.upper()] = [x["value"] for x in data["results"]]
 
             except requests.exceptions.RequestException as e:
-                print(f"⚠️ {indicator.upper()} API Error: {e}")
+                print(f"{indicator.upper()} API Error: {e}")
 
         return df
 

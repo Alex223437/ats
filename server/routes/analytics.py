@@ -14,9 +14,6 @@ from services.analytics_service import get_overview_analytics, get_strategies_pn
 
 analytics_router = APIRouter()
 
-
-# --- SIGNAL LOGS --- #
-
 @analytics_router.get("/analytics/trades", response_model=List[TradeLogResponse])
 def get_trades(
     strategy_id: Optional[int] = Query(None),
@@ -56,8 +53,6 @@ def update_signal_status(
     db.refresh(signal)
     return signal
 
-
-# --- TRADE LOGS --- #
 
 @analytics_router.put("/analytics/trades/{trade_id}", response_model=TradeLogResponse)
 def update_trade_log(

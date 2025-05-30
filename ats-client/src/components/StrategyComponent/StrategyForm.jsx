@@ -241,23 +241,6 @@ const StrategyForm = ({ strategy, onSave, onDelete }) => {
         </div>
       </div>
      
-
-      {/* <label>Use Notional ($)</label>
-      <input
-        type="checkbox"
-        disabled={!isEditable}
-        checked={useNotional}
-        onChange={(e) => setUseNotional(e.target.checked)}
-      /> */}
-
-      {/* <label>Use % of Balance</label>
-      <input
-        type="checkbox"
-        disabled={!isEditable}
-        checked={useBalancePercent}
-        onChange={(e) => setUseBalancePercent(e.target.checked)}
-      /> */}
-
       <label>Trade Amount (Default - quantity)</label>
       <input
         type="number"
@@ -323,17 +306,7 @@ const StrategyForm = ({ strategy, onSave, onDelete }) => {
           />
         </div>
       </div>
-
-      {/* <label>SL/TP in Percent</label>
-      <input
-        type="checkbox"
-        disabled={!isEditable}
-        checked={slTpIsPercent}
-        onChange={(e) => setSlTpIsPercent(e.target.checked)}
-      /> */}
-
       
-
       <label>Apply to Tickers</label>
       <div className="ticker-checkboxes">
         {availableTickers.map((ticker) => (

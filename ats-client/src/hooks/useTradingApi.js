@@ -9,15 +9,15 @@ const useTradingApi = (broker = 'alpaca') => {
   const [brokerError, setBrokerError] = useState('');
   const [initialLoaded, setInitialLoaded] = useState(false);
 
-  const hasLoaded = useRef(false); // ✅ защита
+  const hasLoaded = useRef(false);
 
   const { data: orders, loading: loadingOrders, request: fetchOrders } = useApiRequest();
 
   const { data: positions, loading: loadingPositions, request: fetchPositions } = useApiRequest();
 
   useEffect(() => {
-    if (hasLoaded.current) return; // ⛔ уже было вызвано
-    hasLoaded.current = true; // ✅ больше не вызывать
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
 
     const load = async () => {
       try {

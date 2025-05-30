@@ -63,10 +63,3 @@ const TickerOverview = ({ tickers = [], loading = false }) => {
 };
 
 export default TickerOverview;
-
-
-// const mock = [
-//     { symbol: 'AAPL', price: 212.33, rsi: 45, ema_10: 133.5, signal: 'BUY' },
-//     { symbol: 'MSFT', price: 320.12, rsi: 62, ema_10: 313.4, signal: 'HOLD' },
-//     { symbol: 'TSLA', price: 250.87, rsi: 67, ema_10: 245.2, signal: 'SELL' }
-//   ];

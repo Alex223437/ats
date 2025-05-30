@@ -5,8 +5,7 @@ from ai_model.strategies.execute_ml_tf import execute_conservative_strategy
 
 def simulate_ai_strategy(ticker: str, user_id: int, df: pd.DataFrame) -> tuple[list[dict], list[dict], str | None, float | None]:
     """
-    Выполняет симуляцию AI-стратегии на основе предсказанных сигналов модели и логики консервативной стратегии.
-    Возвращает: trades_log, equity_curve, position, entry_price
+    Simulates a trading strategy using AI-generated signals.
     """
     df = df.copy()
 
@@ -15,8 +14,8 @@ def simulate_ai_strategy(ticker: str, user_id: int, df: pd.DataFrame) -> tuple[l
         if signal_df.empty:
             raise ValueError("AI signals dataframe is empty")
     except Exception as e:
-        print(f"❌ Failed to generate AI predictions: {e}")
-        raise ValueError("Ошибка предсказания модели")
+        print(f"Failed to generate AI predictions: {e}")
+        raise ValueError("Failed to generate AI predictions") from e
 
     df = df.merge(signal_df, left_index=True, right_index=True, how="left")
     df["signal"] = df["signal"].fillna("hold")

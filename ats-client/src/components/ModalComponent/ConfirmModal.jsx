@@ -7,7 +7,7 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, loading }) 
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (modalRef.current && !modalRef.current.contains(e.target)) {
-        onCancel(); // Закрываем при клике вне модалки
+        onCancel(); 
       }
     };
 

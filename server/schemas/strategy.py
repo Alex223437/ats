@@ -32,6 +32,10 @@ class TensorFlowStrategyBase(BaseModel):
     training_ticker: str
     training_from_date: str
     training_to_date: str
+    trade_amount: float
+    use_balance_percent: bool
+    use_notional: bool
+    automation_mode: Literal["Manual", "NotifyOnly", "SemiAuto", "FullAuto"]
 
 StrategyBase = Union[CustomStrategyBase, TensorFlowStrategyBase]
 

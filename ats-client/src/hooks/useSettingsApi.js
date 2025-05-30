@@ -40,7 +40,6 @@ const useSettingsApi = () => {
   const { request: updateTradingPrefs, loading: updatingTradingPrefs } = useApiRequest(false);
 
   return {
-    // User settings
     fetchUserSettings: () => fetchUserSettings({ method: 'get', url: '/user/settings' }),
     updateUserProfile: (data) =>
       updateUserProfile({ method: 'put', url: '/user/settings/profile', data }),
@@ -48,7 +47,6 @@ const useSettingsApi = () => {
     loadingUser,
     errorUser,
 
-    // Notification settings
     fetchNotifications: () => fetchNotifications({ method: 'get', url: '/settings/notifications' }),
     updateNotifications: (data) =>
       updateNotifications({ method: 'post', url: '/settings/notifications', data }),
@@ -57,7 +55,6 @@ const useSettingsApi = () => {
     errorNotifications,
     updatingNotifications,
 
-    // Broker settings
     fetchBroker: (broker = 'alpaca') =>
       fetchBroker({ method: 'get', url: `/user/brokers/${broker}/check` }),
     updateBroker: (data) => updateBroker({ method: 'post', url: '/user/brokers', data }),
@@ -69,7 +66,6 @@ const useSettingsApi = () => {
     updatingBroker,
     disconnectingBroker,
 
-    // Trading preferences
     fetchTradingPreferences: () => fetchTradingPrefs({ method: 'get', url: '/settings/trading' }),
     updateTradingPreferences: (data) =>
       updateTradingPrefs({ method: 'post', url: '/settings/trading', data }),

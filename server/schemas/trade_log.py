@@ -6,12 +6,11 @@ class TradeLogResponse(BaseModel):
     id: int
     strategy_id: int
     symbol: str
-    action: str               # buy/sell
+    action: str               
     price: float
     quantity: int
     timestamp: datetime
 
-    # Новые поля:
     exit_price: Optional[float] = None
     exit_time: Optional[datetime] = None
     pnl: Optional[float] = None

@@ -51,23 +51,23 @@ def get_tp_sl_prices(price, action, strategy):
 
 
 def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
-    print(f"▶️ Strategy '{strategy.title}' checking {ticker}...")
+    print(f"Strategy '{strategy.title}' checking {ticker}...")
 
     broker = next((b for b in user.brokers if b.is_connected), None)
     if not broker:
-        print(f"❌ No connected broker for user {user.id}")
+        print(f"No connected broker for user {user.id}")
         return
 
 
     # df = fetch_history_alpaca(symbol=ticker, start=start, end=end, timeframe=strategy.default_timeframe)
     df = fetch_intraday_alpaca(symbol=ticker, timeframe=strategy.default_timeframe)
     if df is None or df.empty:
-        print(f"⚠️ No data for {ticker}")
+        print(f"No data for {ticker}")
         return
 
     result = StrategyService.apply_saved_strategy(df, strategy.id, db)
     if result is None or result.empty:
-        print(f"⚠️ Strategy returned empty for {ticker}")
+        print(f"Strategy returned empty for {ticker}")
         return
 
     recent = result.tail(strategy.confirmation_candles or 1)
@@ -76,7 +76,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
     action = "buy" if buy_confirmed else "sell" if sell_confirmed else None
 
     if not action:
-        print(f"⏹ No confirmed signal for {ticker}")
+        print(f"No confirmed signal for {ticker}")
         return
 
     price = float(recent.iloc[-1].get("Close", 0.0))
@@ -90,7 +90,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
         .first()
     )
     if last_signal and get_debug_hash(last_signal.debug_data) == signal_hash:
-        print(f"🛑 Duplicate signal for {ticker} skipped.")
+        print(f"Duplicate signal for {ticker} skipped.")
         return
     
     positions = get_positions(broker)
@@ -101,7 +101,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
         position_side = "buy" if position_qty > 0 else "sell"
 
         if action == position_side or action is None:
-            print(f"⏸ HOLD: Already holding {position_side} on {ticker}, skipping same direction")
+            print(f"HOLD: Already holding {position_side} on {ticker}, skipping same direction")
 
             hold_signal = SignalLog(
                 user_id=user.id,
@@ -134,7 +134,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
         try:
             send_signal_notification(user.email, ticker, action, price)
         except Exception as e:
-            print(f"⚠️ Failed to send signal notification: {e}")
+            print(f"Failed to send signal notification: {e}")
 
     qty = None
     notional = None
@@ -171,7 +171,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
 
         if notional:
             if order_type != "market":
-                print("❌ Notional only valid with market orders")
+                print("Notional only valid with market orders")
                 trade.status = "rejected"
                 new_signal.result = "failed: notional invalid with non-market"
                 db.commit()
@@ -180,15 +180,14 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
 
         # 🛡 Защита: нельзя использовать SL/TP при notional или percent
         if (strategy.take_profit or strategy.stop_loss) and (strategy.use_notional or strategy.use_balance_percent):
-            print("❌ TP/SL поддерживаются только при использовании фиксированного qty")
+            print("TP/SL поддерживаются только при использовании фиксированного qty")
             trade.status = "rejected"
             new_signal.result = "failed: TP/SL not allowed with notional or balance percent"
             db.commit()
             return
 
-        # 🛡 Защита: нельзя шортить fractional, если нет позиции
         if action == "sell" and (strategy.use_notional or strategy.use_balance_percent):
-            print("❌ Short with notional or balance % запрещен")
+            print("Short with notional or balance % запрещен")
             trade.status = "rejected"
             new_signal.result = "failed: short not allowed with notional or percent"
             db.commit()
@@ -208,9 +207,8 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
         take_profit, stop_loss = get_tp_sl_prices(price, action, strategy)
         order_class = "bracket" if take_profit or stop_loss else None
 
-        # 🛡 Защита: bracket не поддерживает fractional qty
         if order_class == "bracket" and qty is not None and not qty.is_integer():
-            print(f"❌ Bracket-ордера не поддерживают fractional qty: {qty}")
+            print(f"Bracket-ордера не поддерживают fractional qty: {qty}")
             trade.status = "rejected"
             new_signal.result = "failed: fractional qty not allowed for bracket"
             db.commit()
@@ -241,7 +239,7 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
             new_signal.result = "matched"
             db.commit()
 
-            print(f"✅ Order placed: {action.upper()} {ticker}")
+            print(f"Order placed: {action.upper()} {ticker}")
 
             if prefs and prefs.email_alerts_enabled and prefs.notify_on_order_filled:
                 send_order_filled_notification(user.email, ticker, price, notional or qty)
@@ -252,12 +250,12 @@ def run_strategy_for_ticker(strategy: Strategy, ticker: str, user, db: Session):
             new_signal.result = f"failed: {error_msg}"
             db.commit()
 
-            print(f"❌ Order failed: {error_msg}")
+            print(f"Order failed: {error_msg}")
             if prefs and prefs.email_alerts_enabled and prefs.notify_on_error:
                 send_error_notification(user.email, error_msg)
 
 def check_and_run_strategies():
-    print("🧠 Running strategy engine...")
+    print("Running strategy engine...")
     db = SessionLocal()
     now = datetime.utcnow()
 
@@ -267,7 +265,7 @@ def check_and_run_strategies():
         for strategy in strategies:
             interval = parse_check_frequency(strategy.market_check_frequency)
             if strategy.last_checked and (now - strategy.last_checked) < interval:
-                print(f"⏩ Skipping '{strategy.title}' (too early)")
+                print(f"Skipping '{strategy.title}' (too early)")
                 continue
 
             user = strategy.user

@@ -28,7 +28,7 @@ class BacktestTrade(BaseModel):
     time: datetime
 
 class BacktestResponse(BaseModel):
-    id: Optional[int] = None  # ⚠️ Убрали обязательность
+    id: Optional[int] = None 
     metrics: BacktestMetrics
     equity_curve: List[EquityPoint]
     trades: List[BacktestTrade]

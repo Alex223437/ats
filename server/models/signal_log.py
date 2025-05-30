@@ -12,11 +12,11 @@ class SignalLog(Base):
     strategy_id = Column(Integer, ForeignKey("strategies.id", ondelete="CASCADE"), nullable=False)
 
     ticker = Column(String, nullable=False)
-    action = Column(String, nullable=False)  # buy / sell / hold
+    action = Column(String, nullable=False)
     price = Column(Float, nullable=False)
     debug_data = Column(JSON, nullable=True)
-    executed = Column(Boolean, default=False)  # был ли исполнен этот сигнал (перешёл в трейд)
-    result = Column(String, nullable=True)     # например: "matched", "ignored", "failed"
+    executed = Column(Boolean, default=False)
+    result = Column(String, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 

@@ -10,9 +10,6 @@ import './App.css';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const LoginComponent = lazy(() => import('./components/AuthComponents/LoginComponent/LoginComponent'));
 const RegisterComponent = lazy(() => import('./components/AuthComponents/RegisterComponent/RegisterComponent'));
-const SettingsComponent = lazy(() => import('./components/SettingsComponent/SettingsPage'));
-const AsideSettings = lazy(() => import('./components/AsideComponent/AsideSettings'));
-// const StrategyPage = lazy(() => import('./components/StrategyComponent/StrategyPage'));
 const StrategyPage = lazy(() => import('./pages/Strategy/StrategyPage'))
 const AnalyticsPage = lazy(() => import('./pages/Analytics/AnalyticsPage'));
 const BacktestPage = lazy(() => import('./pages/Backtest/BacktestPage'));
@@ -21,7 +18,6 @@ const SettingsPage = lazy(() => import('./pages/Settings/SettingsPage'));
 
 const App = () => {
   const { user, logout, loading } = useAuthContext();
-  const [selectedSection, setSelectedSection] = useState('Profile');
   const [longLoad, setLongLoad] = useState(false);
 
   useEffect(() => {

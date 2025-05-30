@@ -1,17 +1,15 @@
 import pandas as pd
 import numpy as np
 
-TAKE_PROFIT = 0.01  # +1%
-STOP_LOSS = -0.005  # -0.5%
+TAKE_PROFIT = 0.01 
+STOP_LOSS = -0.005  
 # ALLOWED_HOURS = range(15, 22)
 MIN_CONFIDENCE = 0.4
 
 
 def run_conservative_strategy(df: pd.DataFrame, current_position: dict | None = None) -> dict:
     """
-    Проверяет входящий сигнал на соответствие условиям стратегии.
-    Если сигнал допустим — возвращает словарь с действием и метаинформацией.
-    Иначе — возвращает None.
+    Executes a conservative trading strategy based on the latest signals in the DataFrame.
     
     current_position: dict = {
         "type": "long" | "short",
@@ -52,9 +50,7 @@ def run_conservative_strategy(df: pd.DataFrame, current_position: dict | None = 
     elif change <= STOP_LOSS:
         return {"action": "close", "reason": "stop_loss", "price": price, "time": time}
 
-    # Сигнал на закрытие по противоположному действию
     if (pos_type == "long" and signal == "sell") or (pos_type == "short" and signal == "buy"):
         return {"action": "close", "reason": "opposite_signal", "price": price, "time": time}
 
-    # Иначе — позиция удерживается
     return {"action": "hold"}

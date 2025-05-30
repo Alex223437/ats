@@ -115,8 +115,6 @@ const StrategyPage = () => {
     }
   };
 
-  console.log('Selected Strategy:', selectedStrategy);
-
   return (
     <>
       <StrategySidebar

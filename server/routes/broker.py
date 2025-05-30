@@ -82,7 +82,6 @@ def check_broker_connection(
         client = get_api_client(broker)
         account = client.get_account()
 
-        # === Today PnL ===
         try:
             equity = float(getattr(account, "equity", 0))
             last_equity = float(getattr(account, "last_equity", 0))
@@ -90,7 +89,6 @@ def check_broker_connection(
         except Exception:
             today_pnl = None
 
-        # === Total PnL ===
         pnl_total = None
         try:
             activities = client.get_activities(activity_types="FILL")

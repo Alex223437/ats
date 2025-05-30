@@ -9,7 +9,7 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 from dotenv import load_dotenv
 import pickle
-from imblearn.over_sampling import RandomOverSampler
+# from imblearn.over_sampling import RandomOverSampler
 
 from ai_model.preprocessing.data_fetcher import fetch_ohlcv_range_quarterly
 from ai_model.preprocessing.indicator_engine import enrich_with_indicators
@@ -24,7 +24,7 @@ FEATURE_COLUMNS = [
 ]
 SEQUENCE_LENGTH = 30
 TARGET_COLUMN = "Close"
-HORIZON = 3
+HORIZON = 6
 
 
 def generate_labels(df: pd.DataFrame, horizon=HORIZON) -> pd.DataFrame:
@@ -32,7 +32,7 @@ def generate_labels(df: pd.DataFrame, horizon=HORIZON) -> pd.DataFrame:
     future_return = (df[TARGET_COLUMN].shift(-horizon) - df[TARGET_COLUMN]) / df[TARGET_COLUMN]
     df["Label"] = pd.cut(
         future_return,
-        bins=[-np.inf, -0.003, 0.003, np.inf],
+        bins=[-np.inf, -0.01, 0.01, np.inf],
         labels=["sell", "hold", "buy"]
     )
     return df.dropna()

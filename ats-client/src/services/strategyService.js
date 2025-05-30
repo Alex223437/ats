@@ -54,7 +54,6 @@ export const disableStrategy = async (strategyId) => {
   }
 };
 
-// 🆕 Связь стратегии и тикеров
 export const setStrategyTickers = async (strategyId, tickers) => {
   try {
     await api.post(`/strategies/${strategyId}/tickers`, { tickers });
@@ -63,7 +62,6 @@ export const setStrategyTickers = async (strategyId, tickers) => {
   }
 };
 
-// 🆕 Получить тикеры для конкретной стратегии
 export const fetchStrategyTickers = async (strategyId) => {
   try {
     const response = await api.get(`/strategies/${strategyId}/tickers`);

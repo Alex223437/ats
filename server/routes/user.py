@@ -14,7 +14,7 @@ user_router = APIRouter()
 
 @user_router.get("/user/settings", response_model=UserSettingsResponse)
 async def get_user_settings(user: User = Depends(get_current_user)):
-    """Получение всех настроек пользователя"""
+    """User settings endpoint"""
     return {
         "username": user.username,
         "email": user.email,
@@ -28,7 +28,7 @@ async def update_user_profile(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Обновление username / email / password"""
+    """Update username / email / password"""
     if settings.username:
         user.username = settings.username
     if settings.email:

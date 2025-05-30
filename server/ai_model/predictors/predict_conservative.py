@@ -47,7 +47,7 @@ def predict_signals(ticker: str, user_id: int, df: pd.DataFrame):
     X = np.array(X)
 
     if len(X) == 0:
-        print("❌ Not enough data to make prediction.")
+        print("Not enough data to make prediction.")
         return None
 
     print("Generating predictions...")

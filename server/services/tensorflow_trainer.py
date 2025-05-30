@@ -1,4 +1,3 @@
-# services/tensorflow_trainer.py
 from ai_model.trainers.train_conservative import train_classifier
 
 def train_model_for_strategy(strategy, user_id):

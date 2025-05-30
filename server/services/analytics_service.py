@@ -35,7 +35,6 @@ def get_overview_analytics(
     total_pnl = sum(t.pnl for t in trades if t.pnl)
     average_pnl = total_pnl / total_trades if total_trades > 0 else 0
 
-    # PnL-curve и серии
     pnl_curve = []
     pnl_series = []
     cumulative = 0
@@ -52,7 +51,6 @@ def get_overview_analytics(
         drawdown = peak - x
         max_drawdown = max(max_drawdown, drawdown)
 
-    # Sharpe Ratio
     sharpe_ratio = 0.0
     if len(pnl_series) >= 2:
         mean_return = np.mean(pnl_series)
