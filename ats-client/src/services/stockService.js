@@ -14,7 +14,6 @@ export const fetchStockData = async (ticker, strategyId = null, raw = false) => 
   }
 };
 
-// Fetch user stocks
 export const fetchUserStocks = async () => {
   try {
     const response = await api.get('/users/me/stocks');
@@ -25,7 +24,6 @@ export const fetchUserStocks = async () => {
   }
 };
 
-// Add a stock
 export const addUserStock = async (ticker) => {
   try {
     await api.post('/users/me/stocks/add', null, {
@@ -36,7 +34,6 @@ export const addUserStock = async (ticker) => {
   }
 };
 
-// Remove a stock
 export const removeUserStock = async (ticker) => {
   try {
     await api.delete('/users/me/stocks/remove', {
@@ -47,22 +44,12 @@ export const removeUserStock = async (ticker) => {
   }
 };
 
-export const fetchAiPrediction = async (ticker) => {
-  try {
-    const response = await api.get(`/ai/predict/${ticker}`);
-    return response.data;
-  } catch (error) {
-    console.error('Ошибка при загрузке AI предсказаний:', error);
-    return [];
-  }
-};
-
 export const fetchIndicators = async (ticker) => {
   try {
     const response = await api.get(`/api/indicators/${ticker}`);
     return response.data;
   } catch (error) {
-    console.error('Ошибка загрузки индикаторов:', error);
+    console.error('Error indicators loading:', error);
     return null;
   }
 };

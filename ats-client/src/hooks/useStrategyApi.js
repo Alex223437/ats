@@ -10,21 +10,20 @@ export const useStrategyApi = () => {
   const remove = useApiRequest();
   const fetchActive = useApiRequest();
   const disable = useApiRequest();
-  const enable = useApiRequest(); // ✅ новое
+  const enable = useApiRequest();
   const setTickers = useApiRequest();
   const fetchTickers = useApiRequest();
+  const train = useApiRequest();
+  const deleteModel = useApiRequest();
 
   const fetchStrategies = async () => {
     const data = await fetchAll.request({ method: 'get', url: '/strategies' });
 
     const enriched = await Promise.all(
       data.map(async (strategy) => {
-        // Если стратегия не активна — возвращаем её как есть
         if (!strategy.is_enabled || !strategy.tickers?.length) {
           return strategy;
         }
-
-        // Подтянуть last_signals для активной стратегии
         const last_signals = {};
 
         const signalFetches = strategy.tickers.map(async (ticker) => {
@@ -68,7 +67,7 @@ export const useStrategyApi = () => {
     disableStrategy: (strategyId) =>
       disable.request({ method: 'put', url: `/strategies/${strategyId}/disable` }),
     enableStrategy: (strategyId) =>
-      enable.request({ method: 'put', url: `/strategies/${strategyId}/enable` }), // ✅
+      enable.request({ method: 'put', url: `/strategies/${strategyId}/enable` }),
 
     setStrategyTickers: (strategyId, tickers) =>
       setTickers.request({
@@ -76,8 +75,12 @@ export const useStrategyApi = () => {
         url: `/strategies/${strategyId}/tickers`,
         data: { tickers },
       }),
+    trainStrategyModel: (strategyId) =>
+      train.request({ method: 'post', url: `/strategies/${strategyId}/train` }),
     fetchStrategyTickers: (strategyId) =>
       fetchTickers.request({ method: 'get', url: `/strategies/${strategyId}/tickers` }),
+    deleteTrainedModel: (strategyId) =>
+      deleteModel.request({ method: 'delete', url: `/strategies/${strategyId}/model` }),
 
     strategies,
     loading: {
@@ -87,9 +90,10 @@ export const useStrategyApi = () => {
       remove: remove.loading,
       active: fetchActive.loading,
       disable: disable.loading,
-      enable: enable.loading, // ✅
+      enable: enable.loading,
       setTickers: setTickers.loading,
       fetchTickers: fetchTickers.loading,
+      train: train.loading,
     },
   };
 };

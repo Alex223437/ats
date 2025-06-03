@@ -5,9 +5,11 @@ import { useAuthContext } from '@/context/AuthContext';
 import CloudIcon from '@/assets/svg/cloud.svg?react';
 import toast from 'react-hot-toast';
 import LoaderSpinner from '@/components/LoadingComponents/LoaderSpinner';
+import EyeIcon from '@/assets/svg/eye.svg?react';
 import './LoginComponent.scss';
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -44,17 +46,26 @@ const Login = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group password-group">
           <label>Password</label>
-          <input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-
+          <div className="password-wrapper">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="eye-toggle"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label="Toggle password visibility"
+            >
+              <EyeIcon />
+            </button>
+          </div>
         </div>
 
         <button type="submit" className="submit-btn" disabled={loading}>Login</button>

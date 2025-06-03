@@ -4,7 +4,7 @@ class StockBase(BaseModel):
     ticker: str
 
 class StockCreate(StockBase):
-    pass  # Может быть полезно, если потребуется добавить валидацию
+    pass 
 
 class StockResponse(StockBase):
     id: int

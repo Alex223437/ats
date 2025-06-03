@@ -10,17 +10,14 @@ import './App.css';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const LoginComponent = lazy(() => import('./components/AuthComponents/LoginComponent/LoginComponent'));
 const RegisterComponent = lazy(() => import('./components/AuthComponents/RegisterComponent/RegisterComponent'));
-const SettingsComponent = lazy(() => import('./components/SettingsComponent/SettingsPage'));
-const AsideSettings = lazy(() => import('./components/AsideComponent/AsideSettings'));
-// const StrategyPage = lazy(() => import('./components/StrategyComponent/StrategyPage'));
 const StrategyPage = lazy(() => import('./pages/Strategy/StrategyPage'))
 const AnalyticsPage = lazy(() => import('./pages/Analytics/AnalyticsPage'));
 const BacktestPage = lazy(() => import('./pages/Backtest/BacktestPage'));
 const TradingPage = lazy(() => import('./pages/Trading/TradingPage'));
+const SettingsPage = lazy(() => import('./pages/Settings/SettingsPage'));
 
 const App = () => {
   const { user, logout, loading } = useAuthContext();
-  const [selectedSection, setSelectedSection] = useState('Profile');
   const [longLoad, setLongLoad] = useState(false);
 
   useEffect(() => {
@@ -52,17 +49,7 @@ const App = () => {
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/register" element={<RegisterComponent />} />
           <Route path="/trades" element={user ? <TradingPage /> : <Navigate to="/login" replace />} />
-          <Route path="/settings" element={
-            user ? (
-              <>
-                <AsideSettings
-                  selectedSection={selectedSection}
-                  setSelectedSection={setSelectedSection}
-                />
-                <SettingsComponent selectedSection={selectedSection} />
-              </>
-            ) : <Navigate to="/login" replace />
-          } />
+          <Route path="/settings" element={ user ? (<SettingsPage/>) : <Navigate to="/login" replace />} />
           <Route path="/strategy" element={user ? <StrategyPage /> : <Navigate to="/login" replace />} />
           <Route path="/analytics" element={user ? <AnalyticsPage /> : <Navigate to="/login" replace />} />
           <Route path="/backtest" element={user ? <BacktestPage /> : <Navigate to="/login" replace />} />

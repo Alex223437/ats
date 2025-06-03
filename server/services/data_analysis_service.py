@@ -9,9 +9,7 @@ class DataAnalysisService:
         if data is None or data.empty:
             raise ValueError(f"Could not fetch data for {ticker}")
 
-        if strategy_id == "ai":
-            return StrategyService.apply_ai_prediction(data)
-        elif isinstance(strategy_id, int) or (isinstance(strategy_id, str) and strategy_id.isdigit()):
+        if isinstance(strategy_id, int) or (isinstance(strategy_id, str) and strategy_id.isdigit()):
             return StrategyService.apply_saved_strategy(data, int(strategy_id))
         else:
             return StrategyService.apply_moving_average_strategy(data)

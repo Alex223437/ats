@@ -28,7 +28,7 @@ export const loginUser = async (email, password) => {
 export const getCurrentUser = async () => {
   try {
     const response = await api.get('/users/me');
-    return response.data; // `{ username, email }`
+    return response.data;
   } catch (error) {
     console.error('Error fetching user:', error.response?.data || error.message);
     logoutUser();

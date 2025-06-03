@@ -6,13 +6,13 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const { getCurrentUser, logoutUser } = useAuth();
-  const [user, setUser] = useState(undefined); // undefined = loading
+  const [user, setUser] = useState(undefined); 
   const [loading, setLoading] = useState(true);
 
   const loadUser = async () => {
     setLoading(true);
     const userData = await getCurrentUser();
-    setUser(userData); // null если неавторизован
+    setUser(userData); 
     setLoading(false);
   };
 
@@ -24,13 +24,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     loadUser();
 
-    // автообновление токена каждые 5 минут
     const refreshInterval = setInterval(() => {
       api.get('/refresh').catch(() => {
-        // если refresh не сработал — разлогиниваем
         setUser(null);
       });
-    }, 1000 * 60 * 5); // каждые 5 минут
+    }, 1000 * 60 * 5); 
 
     const handleStorageChange = () => {
       if (localStorage.getItem('token')) loadUser();

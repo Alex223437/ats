@@ -5,4 +5,78 @@
   gap: 24px;
   width: 100%;
   padding: 24px 0;
+  .tensorflow-icon {
+    align-self: center;
+    width: 100px;
+    height: 100px;
+    path {
+      fill: #a5b4fc;
+    }
+  }
+  .model-status-card {
+    background-color: #1e293b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: inset 0 0 0 1px #3b82f6;
+    color: #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+
+    .model-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #93c5fd;
+      }
+
+      .model-tag {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background-color: #16a34a33;
+        color: #22c55e;
+        text-transform: uppercase;
+      }
+    }
+
+    .model-info {
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .model-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+
+      button {
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        background-color: #ef4444;
+        color: white;
+        cursor: pointer;
+
+        &:hover {
+          background-color: #b91c1c;
+        }
+
+        &:disabled {
+          background-color: #7f1d1d;
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+      }
+    }
+  }
 }

@@ -8,7 +8,7 @@ class TradeLog(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     strategy_id = Column(Integer, ForeignKey("strategies.id", ondelete="CASCADE"), nullable=False)
     symbol = Column(String, nullable=False)
-    action = Column(String, nullable=False)  # buy / sell
+    action = Column(String, nullable=False) 
     price = Column(Float, nullable=False)
     quantity = Column(Integer, nullable=False)
     exit_price = Column(Float, nullable=True)
@@ -16,6 +16,6 @@ class TradeLog(Base):
     pnl = Column(Float, nullable=True)
     timestamp = Column(DateTime, default=func.now(), nullable=False)
 
-    status = Column(String, default="pending")  # pending / matched / cancelled / rejected
+    status = Column(String, default="pending") 
     is_order = Column(Boolean, default=True)
     broker_order_id = Column(String, nullable=True)

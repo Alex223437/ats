@@ -2,33 +2,41 @@ import os
 import requests
 import pandas as pd
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import lru_cache
 
 load_dotenv()
 
 POLYGON_API_KEY = os.getenv("POLYGON_API_KEY")
 
-_data_cache = {}  # Простое in-memory кэш-хранилище
+_data_cache = {}  
 
 def _cache_key(ticker, from_date, to_date):
     return f"{ticker}_{from_date}_{to_date}"
 
 class MarketData:
     @staticmethod
-    def download_data(ticker: str, multiplier=1, timespan='day', from_date='2024-01-01', to_date=None, use_api=False, force_reload=False):
-        """Загрузка исторических данных через Polygon.io + расчёт индикаторов (локально или через API)"""
+    def download_data(ticker: str, multiplier=1, timespan='hour', from_date=None, to_date=None, use_api=False, force_reload=False):
+        """Download market data from Polygon.io API and calculate indicators."""
+
         if to_date is None:
             to_date = str(datetime.today().date())
+        if from_date is None:
+            from_date = str((datetime.today() - timedelta(days=90)).date())
 
         key = _cache_key(ticker, from_date, to_date)
         if not force_reload and key in _data_cache:
-            print(f"🧠 Кэш: {ticker} ({from_date} → {to_date})")
+            print(f"Cache: {ticker} ({from_date} → {to_date})")
             return _data_cache[key]
 
-        print(f"🌐 Polygon: {ticker} ({from_date} → {to_date})")
+        print(f"Polygon: {ticker} ({from_date} → {to_date})")
         url = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/{multiplier}/{timespan}/{from_date}/{to_date}"
-        params = {"apiKey": POLYGON_API_KEY}
+        params = {
+            "apiKey": POLYGON_API_KEY,
+            "limit": 50000,
+            "adjustment": "raw",
+            "sort": "asc"
+        }
 
         try:
             response = requests.get(url, params=params)
@@ -36,7 +44,7 @@ class MarketData:
             data = response.json()
 
             if "results" not in data or not data["results"]:
-                raise ValueError("Нет данных или неверный API-ключ.")
+                raise ValueError("No data found for the specified ticker and date range.")
 
             df = pd.DataFrame(data["results"]).rename(columns={
                 't': 'Date',
@@ -53,11 +61,11 @@ class MarketData:
             df = MarketData.fetch_indicators_from_api(df, ticker) if use_api else MarketData.calculate_indicators(df)
 
             _data_cache[key] = df
-            print(f"✅ Успешно: {ticker}")
+            print(f"Success: {ticker}")
             return df
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ Polygon Error: {e}")
+            print(f"Polygon Error: {e}")
             return None
 
     @staticmethod
@@ -75,7 +83,7 @@ class MarketData:
                     df[indicator.upper()] = [x["value"] for x in data["results"]]
 
             except requests.exceptions.RequestException as e:
-                print(f"⚠️ {indicator.upper()} API Error: {e}")
+                print(f"{indicator.upper()} API Error: {e}")
 
         return df
 
@@ -96,5 +104,7 @@ class MarketData:
         long_ema = df['Close'].ewm(span=26, adjust=False).mean()
         df['MACD'] = short_ema - long_ema
         df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+        df["Volatility"] = df["High"] - df["Low"]
+        df["Daily_Return"] = (df["Close"] - df["Open"]) / df["Open"]
 
         return df

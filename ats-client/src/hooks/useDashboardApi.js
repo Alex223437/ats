@@ -1,25 +1,49 @@
 import { useEffect, useState } from 'react';
 import useApiRequest from './useApiRequest';
+import { useBrokerApi } from './useBrokerApi';
 
 const useDashboardApi = (selectedStock, stocks) => {
   const [flattenedStrategies, setFlattenedStrategies] = useState([]);
+  const [brokerInfo, setBrokerInfo] = useState(null);
+  const [loadingBroker, setLoadingBroker] = useState(true);
+
+  const defaultBroker = 'alpaca';
+
   const {
+    request: fetchStrategies,
     data: strategiesData,
     loading: loadingStrategies,
-    request: fetchStrategies,
   } = useApiRequest();
+
   const { data: tickerData, loading: loadingOverview, request: fetchOverview } = useApiRequest();
-  const { data: brokerInfo, loading: loadingBroker, request: fetchBroker } = useApiRequest();
+
   const { data: recentSignals, loading: loadingSignals, request: fetchSignals } = useApiRequest();
+
   const { data: chartResponse, loading: loadingMiniChart, request: fetchChart } = useApiRequest();
+
   const { request: fetchLastSignal } = useApiRequest();
+
+  const { checkBroker } = useBrokerApi();
 
   const miniChartData = chartResponse?.data || [];
 
   useEffect(() => {
     fetchStrategies({ method: 'get', url: '/strategies/active' });
-    fetchBroker({ method: 'get', url: '/user/broker/check' });
     fetchSignals({ method: 'get', url: '/signals/recent' });
+
+    const loadBroker = async () => {
+      setLoadingBroker(true);
+      try {
+        const res = await checkBroker(defaultBroker);
+        setBrokerInfo(res?.connected ? res : null);
+      } catch {
+        setBrokerInfo(null);
+      } finally {
+        setLoadingBroker(false);
+      }
+    };
+
+    loadBroker();
   }, []);
 
   useEffect(() => {
@@ -33,9 +57,7 @@ const useDashboardApi = (selectedStock, stocks) => {
   }, [selectedStock]);
 
   useEffect(() => {
-    if (stocks.length > 0) {
-      fetchOverview({ method: 'get', url: '/stocks/overview' });
-    }
+    fetchOverview({ method: 'get', url: '/stocks/overview' });
   }, [stocks]);
 
   useEffect(() => {
@@ -85,7 +107,7 @@ const useDashboardApi = (selectedStock, stocks) => {
     data: {
       flattenedStrategies,
       tickerData,
-      brokerInfo: brokerInfo?.data || null,
+      brokerInfo,
       recentSignals,
       miniChartData,
     },

@@ -17,7 +17,7 @@ const AsideBacktest = ({ onRun }) => {
     onRun?.({
       strategy_id: parseInt(strategyId),
       ticker,
-      parameters: {}, // пока пустой объект
+      parameters: {}, 
       start_date: startDate,
       end_date: endDate,
     });

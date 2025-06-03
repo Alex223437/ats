@@ -10,6 +10,7 @@ from models.user import User
 from schemas.user import UserCreate, UserResponse
 from services.security import get_password_hash, verify_password, create_access_token
 from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from models.strategy import Strategy
 
 auth_router = APIRouter()
 
@@ -53,7 +54,33 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "✅ Registration successful", "user_id": new_user.id}
+    ml_strategies = [
+        Strategy(
+            user_id=new_user.id,
+            title="TensorFlow Strategy",
+            strategy_type="ml_tf",
+            buy_signals=[],
+            sell_signals=[],
+            signal_logic="AND",
+            confirmation_candles=1,
+            order_type="market",
+            use_notional=False,
+            trade_amount=1,
+            use_balance_percent=False,
+            stop_loss=None,
+            take_profit=None,
+            sl_tp_is_percent=True,
+            default_timeframe="1H",
+            market_check_frequency="1 Hour",
+            automation_mode="NotifyOnly",
+            is_enabled=False
+        )
+    ]
+
+    db.add_all(ml_strategies)
+    db.commit()
+
+    return {"message": "Registration successful", "user_id": new_user.id}
 
 
 @auth_router.post("/token")
@@ -61,7 +88,6 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    # Ищем либо по email, либо по username
     user = (
         db.query(User)
         .filter((User.email == form_data.username) | (User.username == form_data.username))
@@ -81,7 +107,7 @@ def login(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,  # В проде ставим True
+        secure=False,  
         samesite="Lax",
         max_age=60 * 60 * 24
     )
@@ -117,7 +143,7 @@ def refresh_token(
             key="access_token",
             value=new_token,
             httponly=True,
-            secure=False,  # True в проде!
+            secure=False,  
             samesite="Lax",
             max_age=60 * 60 * 24
         )

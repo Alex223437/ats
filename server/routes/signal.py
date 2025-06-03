@@ -15,12 +15,18 @@ signals_router = APIRouter(
 )
 
 @signals_router.get("/recent")
-def get_recent_signals(db: Session = Depends(get_db)):
+def get_recent_signals(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
     since = datetime.utcnow() - timedelta(hours=24)
     signals = (
         db.query(SignalLog)
         .join(Strategy)
-        .filter(SignalLog.created_at >= since)
+        .filter(
+            SignalLog.user_id == user.id,
+            SignalLog.created_at >= since
+        )
         .order_by(SignalLog.created_at.desc())
         .limit(20)
         .all()

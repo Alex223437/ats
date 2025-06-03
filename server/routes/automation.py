@@ -11,7 +11,7 @@ def run_automation_all_strategies(db: Session = Depends(get_db)):
     strategies = db.query(Strategy).filter(Strategy.is_enabled.is_(True)).all()
 
     if not strategies:
-        return {"message": "⚠️ Нет активных стратегий для запуска"}
+        return {"message": "No active strategies found."}
 
     executed = []
 
@@ -26,6 +26,6 @@ def run_automation_all_strategies(db: Session = Depends(get_db)):
             })
 
     return {
-        "message": f"✅ Выполнено {len(executed)} проверок",
+        "message": f"Did {len(executed)} control actions",
         "executed": executed
     }

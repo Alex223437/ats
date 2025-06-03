@@ -22,7 +22,7 @@ async def get_stock_data(
 ):
     try:
         if raw:
-            result = await asyncio.to_thread(MarketData.download_data, ticker)
+            result = await asyncio.to_thread(MarketData.download_data, ticker, 1, 'day')
         else:
             result = await asyncio.to_thread(DataAnalysisService.get_strategy_result, ticker, strategy_id)
 
@@ -39,7 +39,7 @@ async def get_stock_data(
         return JSONResponse(content={"data": response})
     
     except Exception as e:
-        print(f"❌ Server error: {e}")  
+        print(f"Server error: {e}")  
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 @stock_router.get("/api/indicators/{ticker}")
@@ -67,10 +67,9 @@ async def get_indicators(ticker: str):
         return JSONResponse(content=indicators)
 
     except Exception as e:
-        print(f"❌ Indicators error: {e}")
+        print(f"Indicators error: {e}")
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-# ✅ Новый эндпоинт для Ticker Overview
 @stock_router.get("/stocks/overview")
 def get_stock_overview(
     db: Session = Depends(get_db),
@@ -93,7 +92,6 @@ def get_stock_overview(
             signal = None
             strategy_title = None
 
-            # Привязка стратегии
             strategy_link = (
                 db.query(Strategy)
                 .join(StrategyTicker, Strategy.id == StrategyTicker.strategy_id)
@@ -109,14 +107,11 @@ def get_stock_overview(
             if data is None or data.empty:
                 continue
 
-            # Текущая цена
             price = round(data["Close"].iloc[-1], 2)
 
-            # RSI и EMA как словари с датами
             rsi = get_latest_from_series_or_dict(data.get("RSI_14"))
             ema_10 = get_latest_from_series_or_dict(data.get("EMA_10"))
 
-            # Стратегия и сигнал
             if strategy_link:
                 strategy_title = strategy_link.title
                 result = StrategyService.apply_saved_strategy(data, strategy_link.id, db)
@@ -141,5 +136,5 @@ def get_stock_overview(
         return response
 
     except Exception as e:
-        print(f"❌ Error in /stocks/overview: {e}")
+        print(f"Error in /stocks/overview: {e}")
         return JSONResponse(content={"error": str(e)}, status_code=500)

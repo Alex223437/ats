@@ -2,6 +2,7 @@ import './ManageStrategies.scss';
 import SkeletonBlock from '@/components/LoadingComponents/SkeletonBlock/SkeletonBlock';
 import FlowerIcon from '@/assets/svg/flower.svg?react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const ManageStrategies = ({ strategies = [], loading, onStart, onStop }) => {
   const hasStrategies = Array.isArray(strategies) && strategies.length > 0;
@@ -53,7 +54,13 @@ const ManageStrategies = ({ strategies = [], loading, onStart, onStop }) => {
                   ) : (
                     <button
                       className="start"
-                      onClick={() => onStart(strategy.id)}
+                      onClick={() => {
+                        if (!strategy.tickers || strategy.tickers.length === 0) {
+                          toast.error('Cannot start strategy without assigned tickers.');
+                          return;
+                        }
+                        onStart(strategy.id);
+                      }}
                       aria-label={`Start strategy ${strategy.title}`}
                     >
                       Start

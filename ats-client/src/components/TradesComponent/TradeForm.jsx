@@ -11,6 +11,7 @@ const TradeForm = ({ onOrderPlaced }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [orderType, setOrderType] = useState('market');
   const [qty, setQty] = useState(1);
+  const [notional, setNotional] = useState('');
   const [timeInForce, setTimeInForce] = useState('day');
   const [limitPrice, setLimitPrice] = useState('');
   const [stopPrice, setStopPrice] = useState('');
@@ -45,11 +46,20 @@ const TradeForm = ({ onOrderPlaced }) => {
 
     const order = {
       symbol: trimmed,
-      qty: Number(qty),
       side,
       order_type: orderType,
       time_in_force: timeInForce,
     };
+
+    if (notional) {
+      order.notional = parseFloat(notional);
+    } else {
+      order.qty = Number(qty);
+    }
+
+    if (notional && qty) {
+      return toast.error("You can't specify both quantity and notional");
+    }
 
     if (orderType === 'limit') order.limit_price = parseFloat(limitPrice);
     if (orderType === 'stop') order.stop_price = parseFloat(stopPrice);
@@ -65,16 +75,17 @@ const TradeForm = ({ onOrderPlaced }) => {
     try {
       setLoading(true);
       await placeOrder(order);
-      toast.success('✅ Order placed successfully!');
+      toast.success('Order placed successfully!');
       setSymbol('');
       setLimitPrice('');
       setStopPrice('');
       setTrailPrice('');
       setTrailPercent('');
       setQty(1);
+      setNotional('');
       onOrderPlaced?.();
     } catch {
-      toast.error('❌ Failed to place order');
+      toast.error('Failed to place order');
     } finally {
       setLoading(false);
     }
@@ -143,7 +154,15 @@ const TradeForm = ({ onOrderPlaced }) => {
       )}
 
       <label htmlFor="qty">Quantity</label>
-      <input type="number" id="qty" value={qty} onChange={(e) => setQty(e.target.value)} />
+      <input type="number" id="qty" value={qty} onChange={(e) => setQty(e.target.value)} disabled={!!notional} />
+
+      <label htmlFor="notional">Notional ($)</label>
+      <input 
+        type="number"
+        id="notional"
+        value={notional}
+        onChange={(e) => setNotional(e.target.value)}
+        disabled={qty || orderType !== 'market' || timeInForce !=="day"} />
 
       <label htmlFor="timeInForce">Time in Force</label>
       <select id="timeInForce" value={timeInForce} onChange={(e) => setTimeInForce(e.target.value)}>

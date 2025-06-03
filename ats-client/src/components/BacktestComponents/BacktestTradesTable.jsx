@@ -41,7 +41,7 @@ export default function BacktestTradesTable({ trades = [], loading = false }) {
                 <td>{trade.price.toFixed(2)}</td>
                 <td>{trade.result.toUpperCase()}</td>
                 <td style={{ color: trade.pnl >= 0 ? "#22c55e" : "#ef4444" }}>
-                  {trade.pnl >= 0 ? "+" : ""}{trade.pnl.toFixed(2)}
+                  {trade.pnl >= 0 ? "+" : ""}{trade.pnl.toFixed(2)}%
                 </td>
                 <td>{new Date(trade.time).toLocaleString()}</td>
               </tr>

@@ -45,3 +45,13 @@ export const placeOrder = async (orderData) => {
     throw error;
   }
 };
+
+export const fetchTradingPreferences = async () => {
+  try {
+    const response = await api.get('/settings/trading');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching trading preferences:', error.response?.data || error.message);
+    throw error;
+  }
+};

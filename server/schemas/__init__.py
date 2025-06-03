@@ -5,3 +5,4 @@ from schemas.backtest import BacktestRequest, BacktestResponse
 from schemas.signal_log import SignalLogResponse, SignalLogUpdate
 from schemas.trade_log import TradeLogResponse, TradeLogUpdate
 from schemas.analytics import AnalyticsOverviewResponse, StrategyPnlItem, StrategyDetailAnalytics, DailyPnlItem, TopTickerItem
+from schemas.broker import BrokerConnectionResponse, UserBrokerSettingsUpdate

@@ -31,6 +31,9 @@
 
   input[type='text'],
   input[type='number'],
+  input[type='time'],
+  input[type='date'],
+  input[type='datetime-local'],
   select {
     height: 40px;
     width: 100%;
@@ -180,4 +183,65 @@
     margin-top: 8px;
     text-align: center;
   }
+  .checkbox-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  gap: 0.6rem;
+}
+
+.custom-checkbox {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #dbeafe;
+  user-select: none;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+
+    &:disabled + .checkmark {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &:checked + .checkmark:after {
+      display: block;
+    }
+  }
+
+  .checkmark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #0f172a;
+    border: 2px solid #6366f1;
+    border-radius: 4px;
+    transition: 0.2s;
+
+    &:after {
+      content: "";
+      position: absolute;
+      display: none;
+      left: 5px;
+      top: 1px;
+      width: 6px;
+      height: 12px;
+      border: solid #a78bfa;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  &:hover input:not(:disabled) ~ .checkmark {
+    border-color: #a78bfa;
+  }
+}
 }

@@ -4,9 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
 import LoaderSpinner from '@/components/LoadingComponents/LoaderSpinner';
 import StarIcon from '@/assets/svg/star2.svg?react';
+import EyeIcon from '@/assets/svg/eye.svg?react';
 import './RegisterComponent.scss';
 
 const Register = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -30,8 +32,16 @@ const Register = () => {
       toast.success('Successfully registered!');
       setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
-      console.error(err);
-      toast.error(error || 'Registration failed');
+      const detail = err?.response?.data?.detail;
+
+      if (detail) {
+        const messages = Array.isArray(detail)
+          ? detail.map((d) => d.msg).join('\n')
+          : detail;
+        toast.error(messages);
+      } else {
+        toast.error('Registration failed');
+      }
     }
   };
 
@@ -63,17 +73,27 @@ const Register = () => {
           />
         </div>
 
-        <div className="form-group">
-          <label>Password</label>
+        <div className="form-group password-group">
+        <label>Password</label>
+        <div className="password-wrapper">
           <input
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
             value={formData.password}
             onChange={handleChange}
             required
           />
+          <button
+            type="button"
+            className="eye-toggle"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label="Toggle password visibility"
+          >
+            <EyeIcon />
+          </button>
         </div>
+      </div>
 
         <button type="submit" className="submit-btn" disabled={loading}>
           {loading ? 'Signing up...' : 'Sign Up'}

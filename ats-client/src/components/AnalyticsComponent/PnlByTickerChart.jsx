@@ -12,8 +12,8 @@ import ArrowIcon from "@/assets/svg/arrow1.svg?react";
 import "./PnlByTickerChart.scss";
 
 const COLORS = {
-  positive: "#7c3aed", // фиолетовый
-  negative: "#f87171", // красный
+  positive: "#7c3aed", 
+  negative: "#f87171", 
 };
 
 export default function PnLByTickerChart({ data = [], loading = false }) {

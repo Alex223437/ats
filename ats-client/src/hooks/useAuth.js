@@ -27,8 +27,6 @@ export const useAuth = () => {
         data: formData,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
-
-      // ✅ кука установлена сервером, токен хранить не нужно
     },
     [request]
   );
