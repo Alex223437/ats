@@ -112,7 +112,7 @@ def login(
         value=access_token,
         httponly=True,
         secure=True,  
-        samesite="Lax",
+        samesite="None",
         max_age=60 * 60 * 24
     )
     print("✅ Set cookie with token:", access_token)  # DEBUG LOG
@@ -149,7 +149,7 @@ def refresh_token(
             value=new_token,
             httponly=True,
             secure=True,  
-            samesite="Lax",
+            samesite="None",
             max_age=60 * 60 * 24
         )
         return {"message": "Token refreshed"}
