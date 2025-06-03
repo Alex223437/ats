@@ -107,7 +107,7 @@ def login(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,  
+        secure=True,  
         samesite="Lax",
         max_age=60 * 60 * 24
     )
@@ -143,7 +143,7 @@ def refresh_token(
             key="access_token",
             value=new_token,
             httponly=True,
-            secure=False,  
+            secure=True,  
             samesite="Lax",
             max_age=60 * 60 * 24
         )
