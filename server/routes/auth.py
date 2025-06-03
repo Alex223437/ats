@@ -17,7 +17,6 @@ auth_router = APIRouter()
 
 def get_token_from_cookie(request: Request) -> str:
     token = request.cookies.get("access_token")
-    print("🍪 Cookie access_token:", token)  # DEBUG LOG
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return token
@@ -27,10 +26,8 @@ def get_current_user(
     token: str = Depends(get_token_from_cookie),
     db: Session = Depends(get_db)
 ) -> User:
-    print("🔐 Decoding token:", token)  # DEBUG LOG
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print("📩 JWT payload:", payload)  # DEBUG LOG
         email: str = payload.get("sub")
         if not email:
             raise HTTPException(status_code=401, detail="Authorization error")
@@ -41,7 +38,6 @@ def get_current_user(
 
         return user
     except JWTError:
-        print("❌ JWT Error:", str(e))  # DEBUG LOG
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
@@ -115,7 +111,6 @@ def login(
         samesite="None",
         max_age=60 * 60 * 24
     )
-    print("✅ Set cookie with token:", access_token)  # DEBUG LOG
     return response
 
 
