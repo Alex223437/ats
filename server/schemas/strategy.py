@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Literal, Union
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional, Literal, Union, Annotated
 from datetime import datetime
-from pydantic import model_validator, ConfigDict
+from pydantic import model_validator
 
 class Signal(BaseModel):
     indicator: str
@@ -37,7 +37,10 @@ class TensorFlowStrategyBase(BaseModel):
     use_notional: bool
     automation_mode: Literal["Manual", "NotifyOnly", "SemiAuto", "FullAuto"]
 
-StrategyBase = Union[CustomStrategyBase, TensorFlowStrategyBase]
+StrategyBase = Annotated[
+    Union[CustomStrategyBase, TensorFlowStrategyBase],
+    Field(discriminator="strategy_type")
+]
 
 class TickerWithSignal(BaseModel):
     ticker: str
@@ -59,7 +62,10 @@ class CustomStrategyCreate(CustomStrategyBase):
 
         return self
 
-StrategyCreate = Union[CustomStrategyCreate, TensorFlowStrategyBase]
+StrategyCreate = Annotated[
+    Union[CustomStrategyCreate, TensorFlowStrategyBase],
+    Field(discriminator="strategy_type")
+]
 
 class CustomStrategyResponse(CustomStrategyBase):
     id: int
@@ -78,7 +84,10 @@ class TensorFlowStrategyResponse(TensorFlowStrategyBase):
 
     model_config = ConfigDict(from_attributes=True)
 
-StrategyResponse = Union[CustomStrategyResponse, TensorFlowStrategyResponse]
+StrategyResponse = Annotated[
+    Union[CustomStrategyResponse, TensorFlowStrategyResponse],
+    Field(discriminator="strategy_type")
+]
 
 class StrategyTickerLink(BaseModel):
     tickers: List[str]

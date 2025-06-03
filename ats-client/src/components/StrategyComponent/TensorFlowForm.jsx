@@ -77,7 +77,8 @@ const TensorFlowStrategyForm = ({ strategy, onSave, onTrain, onDeleteModel }) =>
         automation_mode: automationMode,
         trade_amount: tradeAmount,
         use_notional: useNotional,
-        use_balance_percent: useBalancePercent
+        use_balance_percent: useBalancePercent,
+        strategy_type: "ml_tf"
       });
 
       if (saved?.id && selectedTickers.length) {

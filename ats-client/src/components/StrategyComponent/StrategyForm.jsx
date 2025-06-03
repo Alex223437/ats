@@ -50,8 +50,8 @@ const StrategyForm = ({ strategy, onSave, onDelete }) => {
         setTradeAmount(strategy.trade_amount || 100);
         setUseNotional(strategy.use_notional ?? false);
         setUseBalancePercent(strategy.use_balance_percent ?? false);
-        setStopLoss(strategy.stop_loss ?? undefined);
-        setTakeProfit(strategy.take_profit ?? undefined);
+        setStopLoss(strategy.stop_loss ?? null);
+        setTakeProfit(strategy.take_profit ?? null);
         setSlTpIsPercent(strategy.sl_tp_is_percent ?? true);
         setDefaultTimeframe(strategy.default_timeframe || '1H');
 
@@ -69,8 +69,8 @@ const StrategyForm = ({ strategy, onSave, onDelete }) => {
           setTradeAmount(preferences.default_trade_amount);
           setUseBalancePercent(preferences.use_percentage);
           setUseNotional(!preferences.use_percentage);
-          setStopLoss(preferences.default_stop_loss ?? undefined);
-          setTakeProfit(preferences.default_take_profit ?? undefined);
+          setStopLoss(preferences.default_stop_loss ?? null);
+          setTakeProfit(preferences.default_take_profit ?? null);
           setDefaultTimeframe(preferences.default_timeframe);
         } catch (err) {
           toast.error('Failed to load preferences');
@@ -129,7 +129,8 @@ const StrategyForm = ({ strategy, onSave, onDelete }) => {
         stop_loss: sl,
         take_profit: tp,
         sl_tp_is_percent: slTpIsPercent,
-        default_timeframe: defaultTimeframe
+        default_timeframe: defaultTimeframe,
+        strategy_type: "custom",
       });
 
       if (saved?.id && selectedTickers.length) {
