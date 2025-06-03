@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import LoaderSpinner from "@/components/LoadingComponents/LoaderSpinner";
 import ArrowIcon from "@/assets/svg/arrow1.svg?react";
-import "./PnLByTickerChart.scss";
+import "./PnlByTickerChart.scss";
 
 const COLORS = {
   positive: "#7c3aed", 
