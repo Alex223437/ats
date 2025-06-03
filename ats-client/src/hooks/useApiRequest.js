@@ -18,6 +18,7 @@ const useApiRequest = (initialLoading = true) => {
     } catch (err) {
       const message = err.response?.data?.detail || err.message || 'Unexpected error';
       setError(message);
+      throw err;
     } finally {
       setLoading(false);
     }
