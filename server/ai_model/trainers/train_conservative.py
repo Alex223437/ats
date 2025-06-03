@@ -24,7 +24,7 @@ FEATURE_COLUMNS = [
 ]
 SEQUENCE_LENGTH = 30
 TARGET_COLUMN = "Close"
-HORIZON = 6
+HORIZON = 3
 
 
 def generate_labels(df: pd.DataFrame, horizon=HORIZON) -> pd.DataFrame:
@@ -32,7 +32,7 @@ def generate_labels(df: pd.DataFrame, horizon=HORIZON) -> pd.DataFrame:
     future_return = (df[TARGET_COLUMN].shift(-horizon) - df[TARGET_COLUMN]) / df[TARGET_COLUMN]
     df["Label"] = pd.cut(
         future_return,
-        bins=[-np.inf, -0.01, 0.01, np.inf],
+        bins=[-np.inf, -0.007, 0.007, np.inf],
         labels=["sell", "hold", "buy"]
     )
     return df.dropna()
